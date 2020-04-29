@@ -14,7 +14,7 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
     <Filter Include="Shader Files">
-      <UniqueIdentifier>{ecfaf098-30ac-4f01-8f00-c5eaf22a5c56}</UniqueIdentifier>
+      <UniqueIdentifier>{522d5896-e503-4ad0-880d-ce7c38bf18d9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -24,16 +24,16 @@
     <ClCompile Include="direct3d11.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="render_pass.cpp">
+    <ClCompile Include="draw_cube.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="draw_cube.cpp">
+    <ClCompile Include="gpu_buffers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="pipeline_state.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="gpu_buffers.cpp">
+    <ClCompile Include="render_pass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -41,13 +41,7 @@
     <ClInclude Include="direct3d11.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="render_pass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="draw_cube.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="pipeline_state.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="gpu_buffers.h">
@@ -56,12 +50,18 @@
     <ClInclude Include="gpu_datatypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="pipeline_state.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="render_pass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="vertex_shader.hlsl">
+    <FxCompile Include="pixel_shader.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
-    <FxCompile Include="pixel_shader.hlsl">
+    <FxCompile Include="vertex_shader.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
   </ItemGroup>
