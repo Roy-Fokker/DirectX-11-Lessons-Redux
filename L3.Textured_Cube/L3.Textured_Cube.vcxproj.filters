@@ -65,4 +65,9 @@
       <Filter>Shader Files</Filter>
     </FxCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="uv_grid.dds">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
 </Project>
