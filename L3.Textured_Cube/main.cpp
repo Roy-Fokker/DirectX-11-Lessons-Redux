@@ -8,7 +8,7 @@
 #include "window.h"
 #include "clock.h"
 
-#include "draw_cube.h"
+#include "textured_cube.h"
 
 auto main() -> int
 {
@@ -25,7 +25,7 @@ auto main() -> int
 	auto wnd = window(L"DirectX 11 Lesson: Textured Cube",
 	                  { wnd_width, wnd_height });
 
-	auto dc = draw_cube(wnd.handle());
+	auto dc = textured_cube(wnd.handle());
 	wnd.set_message_callback(window::message_type::keypress,
 	                         [&](uintptr_t wParam, uintptr_t lParam) -> bool
 	{

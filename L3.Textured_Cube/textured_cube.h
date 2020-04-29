@@ -12,12 +12,12 @@ namespace dx11_lessons
 	class mesh_buffer;
 	class constant_buffer;
 
-	class draw_cube
+	class textured_cube
 	{
 	public:
-		draw_cube() = delete;
-		draw_cube(HWND hWnd);
-		~draw_cube();
+		textured_cube() = delete;
+		textured_cube(HWND hWnd);
+		~textured_cube();
 
 		auto on_keypress(uintptr_t wParam, uintptr_t lParam) -> bool;
 		auto on_resize(uintptr_t wParam, uintptr_t lParam) -> bool;

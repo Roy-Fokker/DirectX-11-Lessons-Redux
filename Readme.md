@@ -8,4 +8,5 @@ Since learning DX 12 is proving difficult.
 
 ## Subprojects
 - L1.Basic_Window: Create empty window displaying flat color.
-- L2.Draw_Cube: Draw a cube, use VS, PS and prespective projection
+- L2.Draw_Cube: Draw a cube, use VS, PS and prespective projection.
+- L3.Textured_Cube: Draw a cube with textured faces.

@@ -81,7 +81,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="direct3d11.cpp" />
-    <ClCompile Include="draw_cube.cpp" />
+    <ClCompile Include="textured_cube.cpp" />
     <ClCompile Include="gpu_buffers.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="pipeline_state.cpp" />
@@ -89,7 +89,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="direct3d11.h" />
-    <ClInclude Include="draw_cube.h" />
+    <ClInclude Include="textured_cube.h" />
     <ClInclude Include="gpu_buffers.h" />
     <ClInclude Include="gpu_datatypes.h" />
     <ClInclude Include="pipeline_state.h" />

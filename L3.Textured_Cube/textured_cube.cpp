@@ -1,4 +1,4 @@
-#include "draw_cube.h"
+#include "textured_cube.h"
 
 #include "direct3d11.h"
 #include "render_pass.h"
@@ -32,7 +32,7 @@ namespace
 	using ie = pipeline_state::input_element_type;
 }
 
-draw_cube::draw_cube(HWND hWnd)
+textured_cube::textured_cube(HWND hWnd)
 {
 	dx = std::make_unique<direct3d11>(hWnd);
 	rp = std::make_unique<render_pass>(dx->get_device(), dx->get_swapchain());
@@ -42,9 +42,9 @@ draw_cube::draw_cube(HWND hWnd)
 	create_contant_buffers(hWnd);
 }
 
-draw_cube::~draw_cube() = default;
+textured_cube::~textured_cube() = default;
 
-auto draw_cube::on_keypress(uintptr_t wParam, uintptr_t lParam) -> bool
+auto textured_cube::on_keypress(uintptr_t wParam, uintptr_t lParam) -> bool
 {
 	auto &key = wParam;
 	switch (key)
@@ -57,7 +57,7 @@ auto draw_cube::on_keypress(uintptr_t wParam, uintptr_t lParam) -> bool
 	return true;
 }
 
-auto draw_cube::on_resize(uintptr_t wParam, uintptr_t lParam) -> bool
+auto textured_cube::on_resize(uintptr_t wParam, uintptr_t lParam) -> bool
 {
 	rp.reset(nullptr);
 
@@ -68,12 +68,12 @@ auto draw_cube::on_resize(uintptr_t wParam, uintptr_t lParam) -> bool
 	return true;
 }
 
-auto draw_cube::exit() const -> bool
+auto textured_cube::exit() const -> bool
 {
 	return stop_drawing;
 }
 
-void draw_cube::update(const game_clock &clk)
+void textured_cube::update(const game_clock &clk)
 {
 	auto context = dx->get_context();
 	static auto angle_deg = 0.0;
@@ -93,7 +93,7 @@ void draw_cube::update(const game_clock &clk)
 	                     reinterpret_cast<const void *>(&cube_pos));
 }
 
-void draw_cube::render()
+void textured_cube::render()
 {
 	auto context = dx->get_context();
 
@@ -112,7 +112,7 @@ void draw_cube::render()
 	dx->present(enable_vSync);
 }
 
-void draw_cube::create_pipeline_state_object()
+void textured_cube::create_pipeline_state_object()
 {
 	auto vso = load_binary_file(L"vertex_shader.cso"),
 	     pso = load_binary_file(L"pixel_shader.cso");
@@ -132,7 +132,7 @@ void draw_cube::create_pipeline_state_object()
 	ps = std::make_unique<pipeline_state>(dx->get_device(), desc);
 }
 
-void draw_cube::create_mesh_buffer()
+void textured_cube::create_mesh_buffer()
 {
 	auto cube_vertices = std::vector{
 		vertex{ { -1.0f, -1.0f, -1.0f }, { 0.0f, 0.0f, 0.0f, 1.0f } },
@@ -158,7 +158,7 @@ void draw_cube::create_mesh_buffer()
 	cube_mb = std::make_unique<mesh_buffer>(device, mesh{ cube_vertices, cube_indicies });
 }
 
-void draw_cube::create_contant_buffers(HWND hWnd)
+void textured_cube::create_contant_buffers(HWND hWnd)
 {
 	using slot = constant_buffer::shader_slot;
 	using stage = constant_buffer::shader_stage;
