@@ -17,6 +17,7 @@ render_pass::~render_pass() = default;
 void render_pass::activate(context_t context)
 {
 	context->OMSetRenderTargets(1, &render_target_view.p, depth_stencil_view);
+	context->RSSetViewports(1, &viewport);
 }
 
 void render_pass::clear(context_t context, const std::array<float, 4> &clear_color)

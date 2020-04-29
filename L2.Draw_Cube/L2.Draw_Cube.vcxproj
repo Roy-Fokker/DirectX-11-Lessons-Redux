@@ -82,13 +82,32 @@
   <ItemGroup>
     <ClCompile Include="direct3d11.cpp" />
     <ClCompile Include="draw_cube.cpp" />
+    <ClCompile Include="gpu_buffers.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="pipeline_state.cpp" />
     <ClCompile Include="render_pass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="direct3d11.h" />
     <ClInclude Include="draw_cube.h" />
+    <ClInclude Include="gpu_buffers.h" />
+    <ClInclude Include="gpu_datatypes.h" />
+    <ClInclude Include="pipeline_state.h" />
     <ClInclude Include="render_pass.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="pixel_shader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="vertex_shader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
