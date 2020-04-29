@@ -53,6 +53,9 @@ namespace dx11_lessons
 		void update(direct3d11::context_t context, std::size_t buffer_size, const void *buffer_data);
 
 	private:
+		void create_set_function();
+
+	private:
 		const std::size_t buffer_size;
 		CComPtr<ID3D11Buffer> buffer;
 		shader_stage stage;

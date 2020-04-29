@@ -78,21 +78,7 @@ constant_buffer::constant_buffer(device_t device, shader_stage stage_, shader_sl
 
 	buffer = make_gpu_buffer(device, desc, srd);
 
-	switch (stage)
-	{
-		case shader_stage::vertex:
-			set_buffer_function = [](context_t context, uint32_t slot, uint32_t count, ID3D11Buffer *const *buffers)
-			{
-				context->VSSetConstantBuffers(slot, count, buffers);
-			};
-			break;
-		case shader_stage::pixel:
-			set_buffer_function = [](context_t context, uint32_t slot, uint32_t count, ID3D11Buffer *const *buffers)
-			{
-				context->PSSetConstantBuffers(slot, count, buffers);
-			};
-			break;
-	}
+	create_set_function();
 }
 
 constant_buffer::~constant_buffer() = default;
@@ -118,5 +104,24 @@ void constant_buffer::update(context_t context, std::size_t new_size, const void
 	std::memcpy(gpu_buffer.pData, buffer_data, new_size);
 
 	context->Unmap(buffer.p, NULL);
+}
+
+void constant_buffer::create_set_function()
+{
+	switch (stage)
+	{
+		case shader_stage::vertex:
+			set_buffer_function = [](context_t context, uint32_t slot, uint32_t count, ID3D11Buffer *const *buffers)
+			{
+				context->VSSetConstantBuffers(slot, count, buffers);
+			};
+			break;
+		case shader_stage::pixel:
+			set_buffer_function = [](context_t context, uint32_t slot, uint32_t count, ID3D11Buffer *const *buffers)
+			{
+				context->PSSetConstantBuffers(slot, count, buffers);
+			};
+			break;
+	}
 }
 #pragma endregion
