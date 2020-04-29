@@ -77,6 +77,22 @@ constant_buffer::constant_buffer(device_t device, shader_stage stage_, shader_sl
 	srd.pSysMem = data;
 
 	buffer = make_gpu_buffer(device, desc, srd);
+
+	switch (stage)
+	{
+		case shader_stage::vertex:
+			set_buffer_function = [](context_t context, uint32_t slot, uint32_t count, ID3D11Buffer *const *buffers)
+			{
+				context->VSSetConstantBuffers(slot, count, buffers);
+			};
+			break;
+		case shader_stage::pixel:
+			set_buffer_function = [](context_t context, uint32_t slot, uint32_t count, ID3D11Buffer *const *buffers)
+			{
+				context->PSSetConstantBuffers(slot, count, buffers);
+			};
+			break;
+	}
 }
 
 constant_buffer::~constant_buffer() = default;
@@ -84,23 +100,13 @@ constant_buffer::~constant_buffer() = default;
 void constant_buffer::activate(context_t context)
 {
 	ID3D11Buffer *const buffers[] = { buffer.p };
-	switch (stage)
-	{
-		case shader_stage::vertex:
-			context->VSSetConstantBuffers(static_cast<uint32_t> (slot),
-			                              1,
-			                              buffers);
-			break;
-		case shader_stage::pixel:
-			context->PSSetConstantBuffers(static_cast<uint32_t> (slot),
-			                              1,
-			                              buffers);
-			break;
-	}
+	set_buffer_function(context, static_cast<uint32_t>(slot), 1, buffers);
 }
 
-void constant_buffer::update(context_t context, std::size_t buffer_size, const void *buffer_data)
+void constant_buffer::update(context_t context, std::size_t new_size, const void *buffer_data)
 {
+	assert(buffer_size >= new_size);
+
 	auto gpu_buffer = D3D11_MAPPED_SUBRESOURCE{};
 	auto hr = context->Map(buffer.p,
 	                       NULL,
@@ -109,7 +115,7 @@ void constant_buffer::update(context_t context, std::size_t buffer_size, const v
 	                       &gpu_buffer);
 	assert(SUCCEEDED(hr));
 
-	std::memcpy(gpu_buffer.pData, buffer_data, buffer_size);
+	std::memcpy(gpu_buffer.pData, buffer_data, new_size);
 
 	context->Unmap(buffer.p, NULL);
 }

@@ -3,6 +3,8 @@
 #include "direct3d11.h"
 #include "gpu_datatypes.h"
 
+#include <functional>
+
 namespace dx11_lessons
 {
 	class mesh_buffer
@@ -55,5 +57,8 @@ namespace dx11_lessons
 		CComPtr<ID3D11Buffer> buffer;
 		shader_stage stage;
 		shader_slot slot;
+
+		using set_buffer_fn = void (*)(direct3d11::context_t, uint32_t slot, uint32_t count, ID3D11Buffer *const *);
+		set_buffer_fn set_buffer_function;
 	};
 }
