@@ -9,7 +9,6 @@
 #include "clock.h"
 #include "helpers.h"
 
-#include <cppitertools\imap.hpp>
 #include <DirectXMath.h>
 #include <array>
 #include <vector>
