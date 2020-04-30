@@ -16,13 +16,13 @@ cbuffer transformBuffer : register(b2)
 struct VS_INPUT
 {
 	float4 pos : POSITION;
-	float4 col : COLOR;
+	float2 uv : TEXCOORD;
 };
 
 struct VS_OUTPUT
 {
 	float4 pos : SV_POSITION;
-	float4 col : COLOR;
+	float2 uv : TEXCOORD;
 };
 
 VS_OUTPUT main(VS_INPUT input)
@@ -34,7 +34,7 @@ VS_OUTPUT main(VS_INPUT input)
 	output.pos = mul(input.pos, transform);
 	output.pos = mul(output.pos, wrld);
 	output.pos = mul(output.pos, viewProj);
-	output.col = input.col;
+	output.uv = input.uv;
 
 	return output;
 }

@@ -11,6 +11,7 @@ namespace dx11_lessons
 	class pipeline_state;
 	class mesh_buffer;
 	class constant_buffer;
+	class shader_resource;
 
 	class textured_cube
 	{
@@ -30,6 +31,7 @@ namespace dx11_lessons
 		void create_pipeline_state_object();
 		void create_mesh_buffer();
 		void create_contant_buffers(HWND hWnd);
+		void create_shader_resource();
 
 	private:
 		bool stop_drawing{ false };
@@ -42,5 +44,6 @@ namespace dx11_lessons
 		std::unique_ptr<constant_buffer> projection_cb{};
 		std::unique_ptr<constant_buffer> view_cb{};
 		std::unique_ptr<constant_buffer> transform_cb{};
+		std::unique_ptr<shader_resource> texture_sr{};
 	};
 }

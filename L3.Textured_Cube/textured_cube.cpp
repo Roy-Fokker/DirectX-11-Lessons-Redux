@@ -9,6 +9,7 @@
 #include "clock.h"
 #include "helpers.h"
 
+#include <cppitertools\imap.hpp>
 #include <DirectXMath.h>
 #include <array>
 #include <vector>
@@ -40,6 +41,7 @@ textured_cube::textured_cube(HWND hWnd)
 	create_pipeline_state_object();
 	create_mesh_buffer();
 	create_contant_buffers(hWnd);
+	create_shader_resource();
 }
 
 textured_cube::~textured_cube() = default;
@@ -107,6 +109,7 @@ void textured_cube::render()
 	rp->activate(context);
 	rp->clear(context, clear_color);
 
+	texture_sr->activate(context);
 	cube_mb->draw(context);
 
 	dx->present(enable_vSync);
@@ -134,34 +137,76 @@ void textured_cube::create_pipeline_state_object()
 
 void textured_cube::create_mesh_buffer()
 {
-	auto cube_vertices = std::vector{
-		vertex{ { -1.0f, -1.0f, -1.0f }, { 0.0f, 0.0f, 0.0f, 1.0f } },
-		vertex{ { -1.0f, +1.0f, -1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f } },
-		vertex{ { +1.0f, +1.0f, -1.0f }, { 1.0f, 1.0f, 0.0f, 1.0f } },
-		vertex{ { +1.0f, -1.0f, -1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
-		vertex{ { -1.0f, -1.0f, +1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f } },
-		vertex{ { -1.0f, +1.0f, +1.0f }, { 0.0f, 1.0f, 1.0f, 1.0f } },
-		vertex{ { +1.0f, +1.0f, +1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f } },
-		vertex{ { +1.0f, -1.0f, +1.0f }, { 1.0f, 0.0f, 1.0f, 1.0f } },
-	};
+	auto l = 1.0f,
+	     w = 1.0f,
+	     h = 1.0f;
 
-	auto cube_indicies = std::vector<uint32_t>{
-		0, 1, 2, 0, 2, 3,
-		4, 6, 5, 4, 7, 6,
-		4, 5, 1, 4, 1, 0,
-		3, 2, 6, 3, 6, 7,
-		1, 5, 6, 1, 6, 2,
-		4, 0, 3, 4, 3, 7,
+	auto cube_mesh = mesh{
+		// Vertex List
+		{
+			// Front
+			{ { -l, -w, +h },{ 0.0f, 0.0f } },
+			{ { +l, -w, +h },{ 1.0f, 0.0f } },
+			{ { +l, +w, +h },{ 1.0f, 1.0f } },
+			{ { -l, +w, +h },{ 0.0f, 1.0f } },
+
+			// Bottom
+			{ { -l, -w, -h },{ 0.0f, 0.0f } },
+			{ { +l, -w, -h },{ 1.0f, 0.0f } },
+			{ { +l, -w, +h },{ 1.0f, 1.0f } },
+			{ { -l, -w, +h },{ 0.0f, 1.0f } },
+
+			// Right
+			{ { +l, -w, -h },{ 0.0f, 0.0f } },
+			{ { +l, +w, -h },{ 1.0f, 0.0f } },
+			{ { +l, +w, +h },{ 1.0f, 1.0f } },
+			{ { +l, -w, +h },{ 0.0f, 1.0f } },
+
+			// Left
+			{ { -l, -w, -h },{ 0.0f, 0.0f } },
+			{ { -l, -w, +h },{ 1.0f, 0.0f } },
+			{ { -l, +w, +h },{ 1.0f, 1.0f } },
+			{ { -l, +w, -h },{ 0.0f, 1.0f } },
+
+			// Back
+			{ { -l, -w, -h },{ 0.0f, 0.0f } },
+			{ { -l, +w, -h },{ 1.0f, 0.0f } },
+			{ { +l, +w, -h },{ 1.0f, 1.0f } },
+			{ { +l, -w, -h },{ 0.0f, 1.0f } },
+
+			// Top
+			{ { -l, +w, -h },{ 0.0f, 0.0f } },
+			{ { -l, +w, +h },{ 1.0f, 0.0f } },
+			{ { +l, +w, +h },{ 1.0f, 1.0f } },
+			{ { +l, +w, -h },{ 0.0f, 1.0f } },
+		},
+
+
+		// Index List
+		{
+			// Front
+			0, 1, 2, 0, 2, 3,
+			// Bottom
+			4, 5, 6, 4, 6, 7,
+			// Right
+			8, 9, 10, 8, 10, 11,
+			// Left
+			12, 13, 14, 12, 14, 15,
+			// Back
+			16, 17, 18, 16, 18, 19,
+			// Top
+			20, 21, 22, 20, 22, 23,
+		}
 	};
 
 	auto device = dx->get_device();
-	cube_mb = std::make_unique<mesh_buffer>(device, mesh{ cube_vertices, cube_indicies });
+	cube_mb = std::make_unique<mesh_buffer>(device, cube_mesh);
 }
 
 void textured_cube::create_contant_buffers(HWND hWnd)
 {
-	using slot = constant_buffer::shader_slot;
-	using stage = constant_buffer::shader_stage;
+	using slot = shader_slot;
+	using stage = shader_stage;
 	auto device = dx->get_device();
 
 	// Projection
@@ -200,4 +245,12 @@ void textured_cube::create_contant_buffers(HWND hWnd)
 		                                                 sizeof(matrix),
 		                                                 reinterpret_cast<const void *>(&cube_pos));
 	}
+}
+
+void textured_cube::create_shader_resource()
+{
+	auto tex = load_binary_file(L"uv_grid.dds");
+	texture_sr = std::make_unique<shader_resource>(dx->get_device(), 
+	                                               shader_stage::pixel, shader_slot::texture,
+	                                               tex);
 }

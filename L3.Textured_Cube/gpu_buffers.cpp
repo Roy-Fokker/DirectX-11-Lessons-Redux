@@ -1,5 +1,6 @@
 #include "gpu_buffers.h"
 
+#include <DirectXTK\DDSTextureLoader.h>
 #include <array>
 #include <cassert>
 
@@ -86,7 +87,7 @@ constant_buffer::~constant_buffer() = default;
 void constant_buffer::activate(context_t context)
 {
 	ID3D11Buffer *const buffers[] = { buffer.p };
-	set_buffer_function(context, static_cast<uint32_t>(slot), 1, buffers);
+	set_buffer(context, static_cast<uint32_t>(slot), 1, buffers);
 }
 
 void constant_buffer::update(context_t context, std::size_t new_size, const void *buffer_data)
@@ -111,15 +112,56 @@ void constant_buffer::create_set_function()
 	switch (stage)
 	{
 		case shader_stage::vertex:
-			set_buffer_function = [](context_t context, uint32_t slot, uint32_t count, ID3D11Buffer *const *buffers)
+			set_buffer = [](context_t context, uint32_t slot, uint32_t count, ID3D11Buffer *const *buffers)
 			{
 				context->VSSetConstantBuffers(slot, count, buffers);
 			};
 			break;
 		case shader_stage::pixel:
-			set_buffer_function = [](context_t context, uint32_t slot, uint32_t count, ID3D11Buffer *const *buffers)
+			set_buffer = [](context_t context, uint32_t slot, uint32_t count, ID3D11Buffer *const *buffers)
 			{
 				context->PSSetConstantBuffers(slot, count, buffers);
+			};
+			break;
+	}
+}
+#pragma endregion
+
+#pragma region Shader Resource
+shader_resource::shader_resource(device_t device, shader_stage stage_, shader_slot slot_, const std::vector<uint8_t> &data) :
+	stage{ stage_ }, slot{ slot_ }
+{
+	auto hr = DirectX::CreateDDSTextureFromMemory(device,
+	                                              data.data(),
+	                                              data.size(),
+	                                              &resource, &resource_view);
+	assert(SUCCEEDED(hr));
+	
+	create_set_function();
+}
+
+shader_resource::~shader_resource() = default;
+
+void shader_resource::activate(context_t context)
+{
+	ID3D11ShaderResourceView *const views[] = { resource_view.p };
+	set_resource(context, static_cast<uint32_t>(slot), 1, views);
+}
+
+void shader_resource::create_set_function()
+{
+	switch (stage)
+	{
+		case shader_stage::vertex:
+			set_resource = [](context_t context, uint32_t slot, uint32_t count, ID3D11ShaderResourceView *const *views)
+			{
+				context->VSSetShaderResources(slot, count, views);
+			};
+			break;
+		case shader_stage::pixel:
+			set_resource = [](context_t context, uint32_t slot, uint32_t count, ID3D11ShaderResourceView *const *views)
+			{
+				context->PSSetShaderResources(slot, count, views);
 			};
 			break;
 	}

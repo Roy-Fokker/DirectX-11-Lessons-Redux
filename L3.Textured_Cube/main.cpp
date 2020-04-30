@@ -25,16 +25,16 @@ auto main() -> int
 	auto wnd = window(L"DirectX 11 Lesson: Textured Cube",
 	                  { wnd_width, wnd_height });
 
-	auto dc = textured_cube(wnd.handle());
+	auto tc = textured_cube(wnd.handle());
 	wnd.set_message_callback(window::message_type::keypress,
 	                         [&](uintptr_t wParam, uintptr_t lParam) -> bool
 	{
-		return dc.on_keypress(wParam, lParam);
+		return tc.on_keypress(wParam, lParam);
 	});
 	wnd.set_message_callback(window::message_type::resize,
 	                         [&](uintptr_t wParam, uintptr_t lParam) -> bool
 	{
-		return dc.on_resize(wParam, lParam);
+		return tc.on_resize(wParam, lParam);
 	});
 
 	auto clk = game_clock();
@@ -42,13 +42,13 @@ auto main() -> int
 	wnd.show();
 	clk.reset();
 
-	while (wnd.handle() and not dc.exit())
+	while (wnd.handle() and not tc.exit())
 	{
 		clk.tick();
 		wnd.process_messages();
 
-		dc.update(clk);
-		dc.render();
+		tc.update(clk);
+		tc.render();
 	}
 
 	return 0;

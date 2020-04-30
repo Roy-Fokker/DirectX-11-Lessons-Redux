@@ -10,13 +10,13 @@ namespace dx11_lessons
 	struct vertex
 	{
 		DirectX::XMFLOAT3 position;
-		DirectX::XMFLOAT4 color;
+		DirectX::XMFLOAT2 texcoord;
 	};
 
 	static const auto vertex_elements = std::vector<pipeline_state::input_element_type>
 	{
 		pipeline_state::input_element_type::position,
-		pipeline_state::input_element_type::color
+		pipeline_state::input_element_type::texcoord
 	};
 
 	struct mesh
