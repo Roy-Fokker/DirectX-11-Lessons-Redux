@@ -88,7 +88,7 @@ void direct2d_text_cube::update(const game_clock &clk)
 		{
 			angle_deg -= 360.0f;
 		}
-		cube_angle_text = fmt::format(L"Angle: {:03.0f}", angle_deg);
+		cube_angle_text = fmt::format(L"Angle: {:06.2f}", angle_deg);
 
 		auto angle = XMConvertToRadians(static_cast<float>(angle_deg));
 		auto cube_pos = matrix{ XMMatrixIdentity() };
