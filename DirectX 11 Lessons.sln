@@ -18,9 +18,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "L3.Textured_Cube", "L3.Text
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "L4.Direct2D", "L4.Direct2D\L4.Direct2D.vcxproj", "{8ED8D1B4-8EFC-4170-8A08-8FEDEC489A42}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "L5.Lighting", "L5.Lighting\L5.Lighting.vcxproj", "{45E6990B-2407-4A81-ACB0-4C4CBBAF5388}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		common\common.vcxitems*{0881d2ea-6484-4c00-a159-3a2253e16c94}*SharedItemsImports = 4
+		common\common.vcxitems*{45e6990b-2407-4a81-acb0-4c4cbbaf5388}*SharedItemsImports = 4
 		common\common.vcxitems*{51f79271-e831-4e06-96e4-e56f457c1347}*SharedItemsImports = 9
 		common\common.vcxitems*{543713f2-0e9d-4e7f-8095-9762091380ad}*SharedItemsImports = 4
 		common\common.vcxitems*{8ed8d1b4-8efc-4170-8a08-8fedec489a42}*SharedItemsImports = 4
@@ -47,6 +50,10 @@ Global
 		{8ED8D1B4-8EFC-4170-8A08-8FEDEC489A42}.Debug|x64.Build.0 = Debug|x64
 		{8ED8D1B4-8EFC-4170-8A08-8FEDEC489A42}.Release|x64.ActiveCfg = Release|x64
 		{8ED8D1B4-8EFC-4170-8A08-8FEDEC489A42}.Release|x64.Build.0 = Release|x64
+		{45E6990B-2407-4A81-ACB0-4C4CBBAF5388}.Debug|x64.ActiveCfg = Debug|x64
+		{45E6990B-2407-4A81-ACB0-4C4CBBAF5388}.Debug|x64.Build.0 = Debug|x64
+		{45E6990B-2407-4A81-ACB0-4C4CBBAF5388}.Release|x64.ActiveCfg = Release|x64
+		{45E6990B-2407-4A81-ACB0-4C4CBBAF5388}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
