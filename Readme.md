@@ -25,3 +25,4 @@ Library dependencies are installed via [vcpkg](https://github.com/microsoft/vcpk
 - L1.Basic_Window: Create empty window displaying flat color.
 - L2.Draw_Cube: Draw a cube, use VS, PS and prespective projection.
 - L3.Textured_Cube: Draw a cube with textured faces.
+- L4.Direct2D: Draw text using Direct2D

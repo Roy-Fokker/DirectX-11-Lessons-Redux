@@ -14,7 +14,7 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
     <Filter Include="Shader Files">
-      <UniqueIdentifier>{522d5896-e503-4ad0-880d-ce7c38bf18d9}</UniqueIdentifier>
+      <UniqueIdentifier>{90d50035-69f9-430e-b1ee-b960ab594dd6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -33,7 +33,10 @@
     <ClCompile Include="render_pass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="textured_cube.cpp">
+    <ClCompile Include="direct2d_text_cube.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="direct2d1.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -53,7 +56,10 @@
     <ClInclude Include="render_pass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="textured_cube.h">
+    <ClInclude Include="direct2d_text_cube.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="direct2d1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -66,8 +72,8 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <CopyFileToFolders Include="uv_grid.dds">
+    <Image Include="uv_grid.dds">
       <Filter>Resource Files</Filter>
-    </CopyFileToFolders>
+    </Image>
   </ItemGroup>
 </Project>

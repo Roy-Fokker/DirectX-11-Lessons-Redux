@@ -16,11 +16,14 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "L2.Draw_Cube", "L2.Draw_Cub
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "L3.Textured_Cube", "L3.Textured_Cube\L3.Textured_Cube.vcxproj", "{0881D2EA-6484-4C00-A159-3A2253E16C94}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "L4.Direct2D", "L4.Direct2D\L4.Direct2D.vcxproj", "{8ED8D1B4-8EFC-4170-8A08-8FEDEC489A42}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		common\common.vcxitems*{0881d2ea-6484-4c00-a159-3a2253e16c94}*SharedItemsImports = 4
 		common\common.vcxitems*{51f79271-e831-4e06-96e4-e56f457c1347}*SharedItemsImports = 9
 		common\common.vcxitems*{543713f2-0e9d-4e7f-8095-9762091380ad}*SharedItemsImports = 4
+		common\common.vcxitems*{8ed8d1b4-8efc-4170-8a08-8fedec489a42}*SharedItemsImports = 4
 		common\common.vcxitems*{aefb7dce-94de-480b-b38e-e5970d76666b}*SharedItemsImports = 4
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -40,6 +43,10 @@ Global
 		{0881D2EA-6484-4C00-A159-3A2253E16C94}.Debug|x64.Build.0 = Debug|x64
 		{0881D2EA-6484-4C00-A159-3A2253E16C94}.Release|x64.ActiveCfg = Release|x64
 		{0881D2EA-6484-4C00-A159-3A2253E16C94}.Release|x64.Build.0 = Release|x64
+		{8ED8D1B4-8EFC-4170-8A08-8FEDEC489A42}.Debug|x64.ActiveCfg = Debug|x64
+		{8ED8D1B4-8EFC-4170-8A08-8FEDEC489A42}.Debug|x64.Build.0 = Debug|x64
+		{8ED8D1B4-8EFC-4170-8A08-8FEDEC489A42}.Release|x64.ActiveCfg = Release|x64
+		{8ED8D1B4-8EFC-4170-8A08-8FEDEC489A42}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
