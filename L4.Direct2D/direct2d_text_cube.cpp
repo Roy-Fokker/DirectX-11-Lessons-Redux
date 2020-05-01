@@ -105,7 +105,7 @@ void direct2d_text_cube::update(const game_clock &clk)
 		static auto fps = 0.0;
 		static long frame_count = 0;
 		static auto total_time = 0.0;
-		static auto fps_text = fmt::format(L"FPS: {:.2f}", fps);
+		static auto fps_text = std::wstring{};
 
 		total_time += clk.get_delta_s();
 		frame_count++;
