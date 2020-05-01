@@ -1,4 +1,4 @@
-#include "direct2d_text_cube.h"
+﻿#include "direct2d_text_cube.h"
 
 #include "direct3d11.h"
 #include "direct2d1.h"
@@ -79,6 +79,7 @@ auto direct2d_text_cube::exit() const -> bool
 
 void direct2d_text_cube::update(const game_clock &clk)
 {
+	auto cube_angle_text = std::wstring{};
 	// Rotate Cube
 	{
 		static auto angle_deg = 0.0;
@@ -87,6 +88,7 @@ void direct2d_text_cube::update(const game_clock &clk)
 		{
 			angle_deg -= 360.0f;
 		}
+		cube_angle_text = fmt::format(L"Angle: {:03.0f}", angle_deg);
 
 		auto angle = XMConvertToRadians(static_cast<float>(angle_deg));
 		auto cube_pos = matrix{ XMMatrixIdentity() };
@@ -116,11 +118,12 @@ void direct2d_text_cube::update(const game_clock &clk)
 			fps_text = fmt::format(L"FPS: {:.2f}", fps);
 		}
 
-		auto format = d2d->make_text_format(L"Consolas", 100.0f);
+		auto format = d2d->make_text_format(L"Consolas", 75.0f);
 		auto brush = d2d->make_solid_color_brush(D2D1::ColorF(D2D1::ColorF::Black));
 
 		d2d->begin_draw(text_sr->get_dxgi_surface());
 		d2d->draw_text(fps_text, { 10, 10 }, { 512, 512 }, format, brush);
+		d2d->draw_text(cube_angle_text, { 10, 250 }, { 512, 512 }, format, brush);
 		d2d->end();
 	}
 }
