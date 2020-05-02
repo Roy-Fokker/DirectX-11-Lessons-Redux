@@ -20,6 +20,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "L4.Direct2D", "L4.Direct2D\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "L5.Lighting", "L5.Lighting\L5.Lighting.vcxproj", "{45E6990B-2407-4A81-ACB0-4C4CBBAF5388}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "L6.First_Person_Camera", "L6.First_Person_Camera\L6.First_Person_Camera.vcxproj", "{E5DCDD02-F9F7-4AA5-8368-49C7F7F44FE4}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		common\common.vcxitems*{0881d2ea-6484-4c00-a159-3a2253e16c94}*SharedItemsImports = 4
@@ -28,6 +30,7 @@ Global
 		common\common.vcxitems*{543713f2-0e9d-4e7f-8095-9762091380ad}*SharedItemsImports = 4
 		common\common.vcxitems*{8ed8d1b4-8efc-4170-8a08-8fedec489a42}*SharedItemsImports = 4
 		common\common.vcxitems*{aefb7dce-94de-480b-b38e-e5970d76666b}*SharedItemsImports = 4
+		common\common.vcxitems*{e5dcdd02-f9f7-4aa5-8368-49c7f7f44fe4}*SharedItemsImports = 4
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -54,6 +57,10 @@ Global
 		{45E6990B-2407-4A81-ACB0-4C4CBBAF5388}.Debug|x64.Build.0 = Debug|x64
 		{45E6990B-2407-4A81-ACB0-4C4CBBAF5388}.Release|x64.ActiveCfg = Release|x64
 		{45E6990B-2407-4A81-ACB0-4C4CBBAF5388}.Release|x64.Build.0 = Release|x64
+		{E5DCDD02-F9F7-4AA5-8368-49C7F7F44FE4}.Debug|x64.ActiveCfg = Debug|x64
+		{E5DCDD02-F9F7-4AA5-8368-49C7F7F44FE4}.Debug|x64.Build.0 = Debug|x64
+		{E5DCDD02-F9F7-4AA5-8368-49C7F7F44FE4}.Release|x64.ActiveCfg = Release|x64
+		{E5DCDD02-F9F7-4AA5-8368-49C7F7F44FE4}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
