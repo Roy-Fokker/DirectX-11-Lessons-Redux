@@ -1,14 +1,14 @@
-cbuffer frameBuffer : register(b0)
+cbuffer frame_buffer : register(b0)
 {
 	matrix viewProj;
 }
 
-cbuffer objectBuffer : register(b1)
+cbuffer object_buffer : register(b1)
 {
 	matrix wrld;
 }
 
-cbuffer transformBuffer : register(b2)
+cbuffer transform_buffer : register(b2)
 {
 	matrix transform;
 }
@@ -16,12 +16,14 @@ cbuffer transformBuffer : register(b2)
 struct VS_INPUT
 {
 	float4 pos : POSITION;
+	float3 nor : NORMAL;
 	float2 uv : TEXCOORD;
 };
 
 struct VS_OUTPUT
 {
 	float4 pos : SV_POSITION;
+	float3 nor : NORMAL;
 	float2 uv : TEXCOORD;
 };
 
@@ -35,6 +37,10 @@ VS_OUTPUT main(VS_INPUT input)
 	output.pos = mul(output.pos, wrld);
 	output.pos = mul(output.pos, viewProj);
 	output.uv = input.uv;
+
+	output.nor = mul(input.nor, (float3x3)transform);
+	output.nor = mul(output.nor, (float3x3)wrld);
+	output.nor = normalize(output.nor);
 
 	return output;
 }

@@ -8,7 +8,7 @@
 #include "window.h"
 #include "clock.h"
 
-#include "direct2d_text_cube.h"
+#include "lighting_cube.h"
 
 auto main() -> int
 {
@@ -25,16 +25,17 @@ auto main() -> int
 	auto wnd = window(L"DirectX 11 Lesson: Lighting",
 	                  { wnd_width, wnd_height });
 
-	auto dtc = direct2d_text_cube(wnd.handle());
+	auto lc = lighting_cube(wnd.handle());
+
 	wnd.set_message_callback(window::message_type::keypress,
 	                         [&](uintptr_t wParam, uintptr_t lParam) -> bool
 	{
-		return dtc.on_keypress(wParam, lParam);
+		return lc.on_keypress(wParam, lParam);
 	});
 	wnd.set_message_callback(window::message_type::resize,
 	                         [&](uintptr_t wParam, uintptr_t lParam) -> bool
 	{
-		return dtc.on_resize(wParam, lParam);
+		return lc.on_resize(wParam, lParam);
 	});
 
 	auto clk = game_clock();
@@ -42,13 +43,13 @@ auto main() -> int
 	wnd.show();
 	clk.reset();
 
-	while (wnd.handle() and not dtc.exit())
+	while (wnd.handle() and not lc.exit())
 	{
 		clk.tick();
 		wnd.process_messages();
 
-		dtc.update(clk);
-		dtc.render();
+		lc.update(clk);
+		lc.render();
 	}
 
 	return 0;

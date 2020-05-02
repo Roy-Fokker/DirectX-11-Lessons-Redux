@@ -21,9 +21,6 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="direct2d_text_cube.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="direct2d1.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -39,11 +36,11 @@
     <ClCompile Include="render_pass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="lighting_cube.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="direct2d_text_cube.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="direct2d1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -62,12 +59,18 @@
     <ClInclude Include="render_pass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="lighting_cube.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="pixel_shader.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
     <FxCompile Include="vertex_shader.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="lighting.ps.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
   </ItemGroup>

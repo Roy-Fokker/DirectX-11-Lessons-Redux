@@ -1,4 +1,4 @@
-﻿#include "direct2d_text_cube.h"
+﻿#include "lighting_cube.h"
 
 #include "direct3d11.h"
 #include "direct2d1.h"
@@ -34,7 +34,7 @@ namespace
 	using ie = pipeline_state::input_element_type;
 }
 
-direct2d_text_cube::direct2d_text_cube(HWND hWnd)
+lighting_cube::lighting_cube(HWND hWnd)
 {
 	d3d = std::make_unique<direct3d11>(hWnd);
 	d2d = std::make_unique<direct2d1>(d3d->get_dxgi_device());
@@ -46,9 +46,9 @@ direct2d_text_cube::direct2d_text_cube(HWND hWnd)
 	create_shader_resources();
 }
 
-direct2d_text_cube::~direct2d_text_cube() = default;
+lighting_cube::~lighting_cube() = default;
 
-auto direct2d_text_cube::on_keypress(uintptr_t wParam, uintptr_t lParam) -> bool
+auto lighting_cube::on_keypress(uintptr_t wParam, uintptr_t lParam) -> bool
 {
 	auto &key = wParam;
 	switch (key)
@@ -61,7 +61,7 @@ auto direct2d_text_cube::on_keypress(uintptr_t wParam, uintptr_t lParam) -> bool
 	return true;
 }
 
-auto direct2d_text_cube::on_resize(uintptr_t wParam, uintptr_t lParam) -> bool
+auto lighting_cube::on_resize(uintptr_t wParam, uintptr_t lParam) -> bool
 {
 	rp.reset(nullptr);
 
@@ -72,12 +72,12 @@ auto direct2d_text_cube::on_resize(uintptr_t wParam, uintptr_t lParam) -> bool
 	return true;
 }
 
-auto direct2d_text_cube::exit() const -> bool
+auto lighting_cube::exit() const -> bool
 {
 	return stop_drawing;
 }
 
-void direct2d_text_cube::update(const game_clock &clk)
+void lighting_cube::update(const game_clock &clk)
 {
 	auto cube_angle_text = std::wstring{};
 	// Rotate Cube
@@ -128,11 +128,9 @@ void direct2d_text_cube::update(const game_clock &clk)
 	}
 }
 
-void direct2d_text_cube::render()
+void lighting_cube::render()
 {
 	auto context = d3d->get_context();
-
-	ps->activate(context);
 
 	rp->activate(context);
 	rp->clear(context, clear_color);
@@ -140,11 +138,14 @@ void direct2d_text_cube::render()
 	projection_cb->activate(context);
 	view_cb->activate(context);
 
+	light_ps->activate(context);
+	light_cb->activate(context);
 	cube_cb->activate(context);
 	cube_sr->activate(context);
 	cube_mb->activate(context);
 	cube_mb->draw(context);
 
+	ps->activate(context);
 	text_cb->activate(context);
 	text_sr->activate(context);
 	text_mb->activate(context);
@@ -153,10 +154,11 @@ void direct2d_text_cube::render()
 	d3d->present(enable_vSync);
 }
 
-void direct2d_text_cube::create_pipeline_state_object()
+void lighting_cube::create_pipeline_state_object()
 {
 	auto vso = load_binary_file(L"vertex_shader.cso"),
-	     pso = load_binary_file(L"pixel_shader.cso");
+	     basic_pso = load_binary_file(L"pixel_shader.cso"),
+	     light_pso = load_binary_file(L"lighting.ps.cso");
 
 	auto desc = pipeline_state::description
 	{
@@ -166,14 +168,28 @@ void direct2d_text_cube::create_pipeline_state_object()
 		ss::anisotropic_clamp,
 		vertex_elements,
 		vso,
-		pso,
+		basic_pso,
 		D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST
 	};
 
 	ps = std::make_unique<pipeline_state>(d3d->get_device(), desc);
+
+	auto light_desc = pipeline_state::description
+	{
+		bs::opaque,
+		ds::read_write,
+		rs::cull_anti_clockwise,
+		ss::anisotropic_clamp,
+		vertex_elements,
+		vso,
+		light_pso,
+		D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST
+	};
+
+	light_ps = std::make_unique<pipeline_state>(d3d->get_device(), light_desc);
 }
 
-void direct2d_text_cube::create_mesh_buffers()
+void lighting_cube::create_mesh_buffers()
 {
 	auto device = d3d->get_device();
 
@@ -183,44 +199,48 @@ void direct2d_text_cube::create_mesh_buffers()
 		     w = 1.0f,
 		     h = 1.0f;
 
+		auto front_normal = XMFLOAT3{  0.0f, 0.0f, 1.0f }, back_normal   = XMFLOAT3{ 0.0f,  0.0f, -1.0f },
+		     left_normal  = XMFLOAT3{ -1.0f, 0.0f, 0.0f }, right_normal  = XMFLOAT3{ 1.0f,  0.0f,  0.0f },
+		     top_normal   = XMFLOAT3{  0.0f, 1.0f, 0.0f }, bottom_normal = XMFLOAT3{ 0.0f, -1.0f,  0.0f };
+
 		auto cube_mesh = mesh{
 			// Vertex List
 			{
 				// Front
-				{ { -l, -w, +h },{ 0.0f, 0.0f } },
-				{ { +l, -w, +h },{ 1.0f, 0.0f } },
-				{ { +l, +w, +h },{ 1.0f, 1.0f } },
-				{ { -l, +w, +h },{ 0.0f, 1.0f } },
+				{ { -l, -w, +h }, front_normal, { 0.0f, 0.0f } },
+				{ { +l, -w, +h }, front_normal, { 1.0f, 0.0f } },
+				{ { +l, +w, +h }, front_normal, { 1.0f, 1.0f } },
+				{ { -l, +w, +h }, front_normal, { 0.0f, 1.0f } },
 
 				// Bottom
-				{ { -l, -w, -h },{ 0.0f, 0.0f } },
-				{ { +l, -w, -h },{ 1.0f, 0.0f } },
-				{ { +l, -w, +h },{ 1.0f, 1.0f } },
-				{ { -l, -w, +h },{ 0.0f, 1.0f } },
+				{ { -l, -w, -h }, bottom_normal, { 0.0f, 0.0f } },
+				{ { +l, -w, -h }, bottom_normal, { 1.0f, 0.0f } },
+				{ { +l, -w, +h }, bottom_normal, { 1.0f, 1.0f } },
+				{ { -l, -w, +h }, bottom_normal, { 0.0f, 1.0f } },
 
 				// Right
-				{ { +l, -w, -h },{ 0.0f, 0.0f } },
-				{ { +l, +w, -h },{ 1.0f, 0.0f } },
-				{ { +l, +w, +h },{ 1.0f, 1.0f } },
-				{ { +l, -w, +h },{ 0.0f, 1.0f } },
+				{ { +l, -w, -h }, right_normal, { 0.0f, 0.0f } },
+				{ { +l, +w, -h }, right_normal, { 1.0f, 0.0f } },
+				{ { +l, +w, +h }, right_normal, { 1.0f, 1.0f } },
+				{ { +l, -w, +h }, right_normal, { 0.0f, 1.0f } },
 
 				// Left
-				{ { -l, -w, -h },{ 0.0f, 0.0f } },
-				{ { -l, -w, +h },{ 1.0f, 0.0f } },
-				{ { -l, +w, +h },{ 1.0f, 1.0f } },
-				{ { -l, +w, -h },{ 0.0f, 1.0f } },
+				{ { -l, -w, -h }, left_normal, { 0.0f, 0.0f } },
+				{ { -l, -w, +h }, left_normal, { 1.0f, 0.0f } },
+				{ { -l, +w, +h }, left_normal, { 1.0f, 1.0f } },
+				{ { -l, +w, -h }, left_normal, { 0.0f, 1.0f } },
 
 				// Back
-				{ { -l, -w, -h },{ 0.0f, 0.0f } },
-				{ { -l, +w, -h },{ 1.0f, 0.0f } },
-				{ { +l, +w, -h },{ 1.0f, 1.0f } },
-				{ { +l, -w, -h },{ 0.0f, 1.0f } },
+				{ { -l, -w, -h }, back_normal, { 0.0f, 0.0f } },
+				{ { -l, +w, -h }, back_normal, { 1.0f, 0.0f } },
+				{ { +l, +w, -h }, back_normal, { 1.0f, 1.0f } },
+				{ { +l, -w, -h }, back_normal, { 0.0f, 1.0f } },
 
 				// Top
-				{ { -l, +w, -h },{ 0.0f, 0.0f } },
-				{ { -l, +w, +h },{ 1.0f, 0.0f } },
-				{ { +l, +w, +h },{ 1.0f, 1.0f } },
-				{ { +l, +w, -h },{ 0.0f, 1.0f } },
+				{ { -l, +w, -h }, top_normal, { 0.0f, 0.0f } },
+				{ { -l, +w, +h }, top_normal, { 1.0f, 0.0f } },
+				{ { +l, +w, +h }, top_normal, { 1.0f, 1.0f } },
+				{ { +l, +w, -h }, top_normal, { 0.0f, 1.0f } },
 			},
 
 
@@ -251,10 +271,10 @@ void direct2d_text_cube::create_mesh_buffers()
 		auto rect_mesh = mesh{
 			// Vertex List
 			{
-				{ { -l, +w, 0.0f },{ 0.0f, 0.0f } },
-				{ { +l, +w, 0.0f },{ 1.0f, 0.0f } },
-				{ { +l, -w, 0.0f },{ 1.0f, 1.0f } },
-				{ { -l, -w, 0.0f },{ 0.0f, 1.0f } },
+				{ { -l, +w, 0.0f }, { 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f } },
+				{ { +l, +w, 0.0f }, { 0.0f, 0.0f, 1.0f }, { 1.0f, 0.0f } },
+				{ { +l, -w, 0.0f }, { 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f } },
+				{ { -l, -w, 0.0f }, { 0.0f, 0.0f, 1.0f }, { 0.0f, 1.0f } },
 			},
 
 			// Index List
@@ -268,7 +288,7 @@ void direct2d_text_cube::create_mesh_buffers()
 	}
 }
 
-void direct2d_text_cube::create_contant_buffers(HWND hWnd)
+void lighting_cube::create_contant_buffers(HWND hWnd)
 {
 	using slot = shader_slot;
 	using stage = shader_stage;
@@ -320,9 +340,19 @@ void direct2d_text_cube::create_contant_buffers(HWND hWnd)
 		                                            sizeof(matrix),
 		                                            reinterpret_cast<const void *>(&text_pos));
 	}
+
+	// Light
+	{
+		auto light_data = light{};
+		light_data.diffuse = { 0.5f, 0.5f, 1.0f, 1.0f };
+		light_data.light_dir = { 0.0f, 1.0f, 3.0f };
+		light_cb = std::make_unique<constant_buffer>(device, stage::pixel, slot::light,
+		                                             sizeof(light),
+		                                             reinterpret_cast<const void *>(&light_data));
+	}
 }
 
-void direct2d_text_cube::create_shader_resources()
+void lighting_cube::create_shader_resources()
 {
 	auto device = d3d->get_device();
 

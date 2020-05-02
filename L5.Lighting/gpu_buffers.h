@@ -21,6 +21,7 @@ namespace dx11_lessons
 		view = 1,
 		transform = 2,
 		texture = 0,
+		light = 0,
 	};
 
 	class mesh_buffer

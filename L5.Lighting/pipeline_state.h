@@ -58,6 +58,7 @@ namespace dx11_lessons
 		enum class input_element_type
 		{
 			position,
+			normal,
 			color,
 			texcoord,
 		};

@@ -14,12 +14,12 @@ namespace dx11_lessons
 	class constant_buffer;
 	class shader_resource;
 
-	class direct2d_text_cube
+	class lighting_cube
 	{
 	public:
-		direct2d_text_cube() = delete;
-		direct2d_text_cube(HWND hWnd);
-		~direct2d_text_cube();
+		lighting_cube() = delete;
+		lighting_cube(HWND hWnd);
+		~lighting_cube();
 
 		auto on_keypress(uintptr_t wParam, uintptr_t lParam) -> bool;
 		auto on_resize(uintptr_t wParam, uintptr_t lParam) -> bool;
@@ -40,14 +40,19 @@ namespace dx11_lessons
 		std::unique_ptr<direct3d11> d3d{};
 		std::unique_ptr<direct2d1> d2d{};
 		std::unique_ptr<render_pass> rp{};
+
 		std::unique_ptr<pipeline_state> ps{};
+		std::unique_ptr<pipeline_state> light_ps{};
 
 		std::unique_ptr<mesh_buffer> cube_mb{};
 		std::unique_ptr<mesh_buffer> text_mb{};
 
 		std::unique_ptr<constant_buffer> projection_cb{};
 		std::unique_ptr<constant_buffer> view_cb{};
+
 		std::unique_ptr<constant_buffer> cube_cb{};
+		std::unique_ptr<constant_buffer> light_cb{};
+
 		std::unique_ptr<constant_buffer> text_cb{};
 
 		std::unique_ptr<shader_resource> cube_sr{};

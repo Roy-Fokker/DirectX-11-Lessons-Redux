@@ -81,7 +81,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="direct2d1.cpp" />
-    <ClCompile Include="direct2d_text_cube.cpp" />
+    <ClCompile Include="lighting_cube.cpp" />
     <ClCompile Include="direct3d11.cpp" />
     <ClCompile Include="gpu_buffers.cpp" />
     <ClCompile Include="main.cpp" />
@@ -90,7 +90,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="direct2d1.h" />
-    <ClInclude Include="direct2d_text_cube.h" />
+    <ClInclude Include="lighting_cube.h" />
     <ClInclude Include="direct3d11.h" />
     <ClInclude Include="gpu_buffers.h" />
     <ClInclude Include="gpu_datatypes.h" />
@@ -98,6 +98,12 @@
     <ClInclude Include="render_pass.h" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="lighting.ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
     <FxCompile Include="pixel_shader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
