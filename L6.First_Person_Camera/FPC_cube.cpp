@@ -7,6 +7,7 @@
 #include "gpu_buffers.h"
 #include "gpu_datatypes.h"
 
+#include "raw_input.h"
 #include "clock.h"
 #include "helpers.h"
 
@@ -48,19 +49,6 @@ fpc_cube::fpc_cube(HWND hWnd)
 
 fpc_cube::~fpc_cube() = default;
 
-auto fpc_cube::on_keypress(uintptr_t wParam, uintptr_t lParam) -> bool
-{
-	auto &key = wParam;
-	switch (key)
-	{
-		case VK_ESCAPE:
-			stop_drawing = true;
-			break;
-	}
-
-	return true;
-}
-
 auto fpc_cube::on_resize(uintptr_t wParam, uintptr_t lParam) -> bool
 {
 	rp.reset(nullptr);
@@ -77,8 +65,10 @@ auto fpc_cube::exit() const -> bool
 	return stop_drawing;
 }
 
-void fpc_cube::update(const game_clock &clk)
+void fpc_cube::update(const game_clock &clk, const raw_input &input)
 {
+	input_update(clk, input);
+
 	auto cube_angle_text = std::wstring{};
 	// Rotate Cube
 	{
@@ -387,5 +377,13 @@ void fpc_cube::create_shader_resources()
 		text_sr = std::make_unique<shader_resource>(device,
 		                                            shader_stage::pixel, shader_slot::texture,
 		                                            text_tex);
+	}
+}
+
+void fpc_cube::input_update(const game_clock &clk, const raw_input &input)
+{
+	if (input.is_button_down(input_button::escape))
+	{
+		stop_drawing = true;
 	}
 }

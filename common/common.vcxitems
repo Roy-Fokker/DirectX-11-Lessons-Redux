@@ -16,11 +16,13 @@
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)clock.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)helpers.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)raw_input.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)clock.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)helpers.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)raw_input.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)window.h" />
   </ItemGroup>
   <ItemGroup>

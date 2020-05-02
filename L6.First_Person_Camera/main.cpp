@@ -7,6 +7,7 @@
 
 #include "window.h"
 #include "clock.h"
+#include "raw_input.h"
 
 #include "fpc_cube.h"
 
@@ -27,11 +28,6 @@ auto main() -> int
 
 	auto fpc = fpc_cube(wnd.handle());
 
-	wnd.set_message_callback(window::message_type::keypress,
-	                         [&](uintptr_t wParam, uintptr_t lParam) -> bool
-	{
-		return fpc.on_keypress(wParam, lParam);
-	});
 	wnd.set_message_callback(window::message_type::resize,
 	                         [&](uintptr_t wParam, uintptr_t lParam) -> bool
 	{
@@ -39,6 +35,7 @@ auto main() -> int
 	});
 
 	auto clk = game_clock();
+	auto input = raw_input(wnd.handle(), { input_device::keyboard, input_device::mouse });
 
 	wnd.show();
 	clk.reset();
@@ -46,9 +43,10 @@ auto main() -> int
 	while (wnd.handle() and not fpc.exit())
 	{
 		clk.tick();
+		input.process_messages();
 		wnd.process_messages();
 
-		fpc.update(clk);
+		fpc.update(clk, input);
 		fpc.render();
 	}
 

@@ -6,6 +6,7 @@
 namespace dx11_lessons
 {
 	class game_clock;
+	class raw_input;
 	class direct3d11;
 	class direct2d1;
 	class render_pass;
@@ -21,11 +22,10 @@ namespace dx11_lessons
 		fpc_cube(HWND hWnd);
 		~fpc_cube();
 
-		auto on_keypress(uintptr_t wParam, uintptr_t lParam) -> bool;
 		auto on_resize(uintptr_t wParam, uintptr_t lParam) -> bool;
 
 		auto exit() const -> bool;
-		void update(const game_clock &clk);
+		void update(const game_clock &clk, const raw_input &input);
 		void render();
 
 	private:
@@ -33,6 +33,8 @@ namespace dx11_lessons
 		void create_mesh_buffers();
 		void create_contant_buffers(HWND hWnd);
 		void create_shader_resources();
+
+		void input_update(const game_clock &clk, const raw_input &input);
 
 	private:
 		bool stop_drawing{ false };
