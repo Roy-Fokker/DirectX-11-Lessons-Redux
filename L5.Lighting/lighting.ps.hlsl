@@ -4,6 +4,7 @@ SamplerState sampleState;
 cbuffer light_buffer : register (b0)
 {
 	float4 diffuse;
+	float4 ambient;
 	float3 light_dir;
 };
 
@@ -16,12 +17,13 @@ struct PS_INPUT
 
 float4 main(PS_INPUT input) : SV_TARGET
 {
-	float3 light_direction = -light_dir;
-	float light_intensity = saturate(dot(input.nor, light_direction));
-	float4 color = saturate(diffuse * light_intensity);
-
+	float light_intensity = saturate(dot(input.nor, light_dir));
 	float4 tex_color = textureObj.Sample(sampleState, input.uv);
 
-	color = color * tex_color;
+	float4 color = tex_color * ambient;
+	color += saturate(light_intensity * diffuse * tex_color);
+	color.w = tex_color.w;
+	color = saturate(color);
+
 	return color;
 }

@@ -36,10 +36,10 @@ VS_OUTPUT main(VS_INPUT input)
 	output.pos = mul(input.pos, transform);
 	output.pos = mul(output.pos, wrld);
 	output.pos = mul(output.pos, viewProj);
+
 	output.uv = input.uv;
 
-	output.nor = mul(input.nor, (float3x3)transform);
-	output.nor = mul(output.nor, (float3x3)wrld);
+	output.nor = mul(input.nor, transform);
 	output.nor = normalize(output.nor);
 
 	return output;

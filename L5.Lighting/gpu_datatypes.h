@@ -35,6 +35,7 @@ namespace dx11_lessons
 	struct light
 	{
 		DirectX::XMFLOAT4 diffuse;
+		DirectX::XMFLOAT4 ambient;
 		DirectX::XMFLOAT3 light_dir;
 		float padding;
 	};

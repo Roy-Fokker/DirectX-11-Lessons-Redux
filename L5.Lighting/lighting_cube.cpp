@@ -344,8 +344,9 @@ void lighting_cube::create_contant_buffers(HWND hWnd)
 	// Light
 	{
 		auto light_data = light{};
-		light_data.diffuse = { 0.5f, 0.5f, 1.0f, 1.0f };
-		light_data.light_dir = { 0.0f, 1.0f, 3.0f };
+		light_data.diffuse = { 0.5f, 0.0f, 0.5f, 1.0f };
+		light_data.ambient = { 0.0f, 0.5f, 0.0f, 1.0f };
+		light_data.light_dir = { 0.0f, -3.0f, 3.0f };
 		light_cb = std::make_unique<constant_buffer>(device, stage::pixel, slot::light,
 		                                             sizeof(light),
 		                                             reinterpret_cast<const void *>(&light_data));
