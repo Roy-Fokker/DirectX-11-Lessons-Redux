@@ -24,6 +24,7 @@ namespace
 {
 	constexpr auto enable_vSync{ true };
 	constexpr auto clear_color = std::array{ 0.2f, 0.2f, 0.2f, 1.0f };
+	const auto d2d_clear_color = D2D1::ColorF(D2D1::ColorF::Beige);
 	constexpr auto field_of_view = 60.0f;
 	constexpr auto near_z = 0.1f;
 	constexpr auto far_z = 100.0f;
@@ -111,7 +112,7 @@ void fpc_cube::update(const game_clock &clk, const raw_input &input)
 		auto format = d2d->make_text_format(L"Consolas", 75.0f);
 		auto brush = d2d->make_solid_color_brush(D2D1::ColorF(D2D1::ColorF::Black));
 
-		d2d->begin_draw(text_sr->get_dxgi_surface());
+		d2d->begin_draw(text_sr->get_dxgi_surface(), d2d_clear_color);
 		d2d->draw_text(fps_text, { 10, 10 }, { 512, 512 }, format, brush);
 		d2d->draw_text(cube_angle_text, { 10, 250 }, { 512, 512 }, format, brush);
 		d2d->end();

@@ -25,7 +25,7 @@ namespace dx11_lessons
 		direct2d1(dxgi_device_t dxgi_device);
 		~direct2d1();
 
-		void begin_draw(dxgi_surface_t surface);
+		void begin_draw(dxgi_surface_t surface, const D2D1::ColorF &clear_color);
 		void draw_text(const std::wstring_view &text, D2D_POINT_2F position, D2D_POINT_2F size, text_format_t format, solid_color_brush_t brush);
 		void end();
 

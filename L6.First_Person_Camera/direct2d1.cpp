@@ -24,7 +24,7 @@ direct2d1::direct2d1(dxgi_device_t dxgi_device)
 
 direct2d1::~direct2d1() = default;
 
-void direct2d1::begin_draw(dxgi_surface_t surface)
+void direct2d1::begin_draw(dxgi_surface_t surface, const D2D1::ColorF &clear_color)
 {
 	auto sd = DXGI_SURFACE_DESC{};
 	auto hr = surface->GetDesc(&sd);
@@ -41,7 +41,7 @@ void direct2d1::begin_draw(dxgi_surface_t surface)
 	context->SetTarget(bitmap);
 
 	context->BeginDraw();
-	context->Clear(D2D1::ColorF(D2D1::ColorF::Beige));
+	context->Clear(clear_color);
 }
 
 void direct2d1::draw_text(const std::wstring_view &text, 
