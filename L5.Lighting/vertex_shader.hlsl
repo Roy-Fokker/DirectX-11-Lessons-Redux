@@ -39,7 +39,7 @@ VS_OUTPUT main(VS_INPUT input)
 
 	output.uv = input.uv;
 
-	output.nor = mul(input.nor, transform);
+	output.nor = mul(input.nor, (float3x3)transform);
 	output.nor = normalize(output.nor);
 
 	return output;
