@@ -32,11 +32,19 @@ namespace dx11_lessons
 		DirectX::XMMATRIX data;
 	};
 
+	struct camera
+	{
+		DirectX::XMMATRIX matrix;
+		DirectX::XMFLOAT3 position;
+		float padding;
+	};
+
 	struct light
 	{
 		DirectX::XMFLOAT4 diffuse;
 		DirectX::XMFLOAT4 ambient;
 		DirectX::XMFLOAT3 light_dir;
-		float padding;
+		float specular_power;
+		DirectX::XMFLOAT4 specular;
 	};
 }

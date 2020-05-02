@@ -6,6 +6,7 @@ cbuffer frame_buffer : register(b0)
 cbuffer object_buffer : register(b1)
 {
 	matrix wrld;
+	float3 eye_pos;
 }
 
 cbuffer transform_buffer : register(b2)
@@ -24,7 +25,8 @@ struct VS_OUTPUT
 {
 	float4 pos : SV_POSITION;
 	float3 nor : NORMAL;
-	float2 uv : TEXCOORD;
+	float2 uv : TEXCOORD0;
+	float3 eye_pos : TEXCOORD1;
 };
 
 VS_OUTPUT main(VS_INPUT input)
@@ -41,6 +43,9 @@ VS_OUTPUT main(VS_INPUT input)
 
 	output.nor = mul(input.nor, (float3x3)transform);
 	output.nor = normalize(output.nor);
+
+	float4 vert_pos = mul(input.pos, transform);
+	output.eye_pos = normalize(eye_pos.xyz - vert_pos.xyz);
 
 	return output;
 }

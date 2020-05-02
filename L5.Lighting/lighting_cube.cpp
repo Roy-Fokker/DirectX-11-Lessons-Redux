@@ -22,7 +22,7 @@ using namespace DirectX;
 namespace
 {
 	constexpr auto enable_vSync{ true };
-	constexpr auto clear_color = std::array{ 0.4f, 0.5f, 0.4f, 1.0f };
+	constexpr auto clear_color = std::array{ 0.2f, 0.2f, 0.2f, 1.0f };
 	constexpr auto field_of_view = 60.0f;
 	constexpr auto near_z = 0.1f;
 	constexpr auto far_z = 100.0f;
@@ -311,12 +311,13 @@ void lighting_cube::create_contant_buffers(HWND hWnd)
 
 	// View
 	{
-		auto view = matrix{ XMMatrixIdentity() };
 		auto eye = XMVectorSet(0.0f, 2.0f, 5.0f, 0.0f),
 		     focus = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f),
 		     up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-		view.data = XMMatrixLookAtLH(eye, focus, up);
-		view.data = XMMatrixTranspose(view.data);
+		auto view = camera{ XMMatrixIdentity() };
+		view.matrix = XMMatrixLookAtLH(eye, focus, up);
+		view.matrix = XMMatrixTranspose(view.matrix);
+		XMStoreFloat3(&view.position, eye);
 		view_cb = std::make_unique<constant_buffer>(device, stage::vertex, slot::view,
 		                                            sizeof(matrix),
 		                                            reinterpret_cast<const void *>(&view));
@@ -344,9 +345,11 @@ void lighting_cube::create_contant_buffers(HWND hWnd)
 	// Light
 	{
 		auto light_data = light{};
-		light_data.diffuse = { 0.5f, 0.0f, 0.5f, 1.0f };
-		light_data.ambient = { 0.0f, 0.5f, 0.0f, 1.0f };
+		light_data.diffuse = { 0.0f, 0.0f, 1.0f, 1.0f };
+		light_data.ambient = { 0.0f, 1.0f, 0.0f, 1.0f };
 		light_data.light_dir = { 0.0f, -3.0f, 3.0f };
+		light_data.specular_power = 1.0f;
+		light_data.specular = { 1.0f, 0.0f, 0.0f, 1.0f };
 		light_cb = std::make_unique<constant_buffer>(device, stage::pixel, slot::light,
 		                                             sizeof(light),
 		                                             reinterpret_cast<const void *>(&light_data));
