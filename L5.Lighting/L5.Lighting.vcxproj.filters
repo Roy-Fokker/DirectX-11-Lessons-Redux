@@ -75,8 +75,8 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="uv_grid.dds">
+    <CopyFileToFolders Include="uv_grid.dds">
       <Filter>Resource Files</Filter>
-    </Image>
+    </CopyFileToFolders>
   </ItemGroup>
 </Project>
