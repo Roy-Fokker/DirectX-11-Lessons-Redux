@@ -80,6 +80,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="camera.cpp" />
     <ClCompile Include="direct2d1.cpp" />
     <ClCompile Include="direct3d11.cpp" />
     <ClCompile Include="gpu_buffers.cpp" />
@@ -89,6 +90,7 @@
     <ClCompile Include="render_pass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="camera.h" />
     <ClInclude Include="direct2d1.h" />
     <ClInclude Include="direct3d11.h" />
     <ClInclude Include="gpu_buffers.h" />

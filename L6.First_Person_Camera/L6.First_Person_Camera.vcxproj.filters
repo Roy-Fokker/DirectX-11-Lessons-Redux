@@ -39,6 +39,9 @@
     <ClCompile Include="FPC_cube.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="direct2d1.h">
@@ -62,6 +65,9 @@
     <ClInclude Include="FPC_cube.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="lighting.ps.hlsl">
@@ -75,8 +81,6 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="uv_grid.dds">
-      <Filter>Resource Files</Filter>
-    </Image>
+    <CopyFileToFolders Include="uv_grid.dds" />
   </ItemGroup>
 </Project>

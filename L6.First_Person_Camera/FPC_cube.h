@@ -7,6 +7,7 @@ namespace dx11_lessons
 {
 	class game_clock;
 	class raw_input;
+	class camera;
 	class direct3d11;
 	class direct2d1;
 	class render_pass;
@@ -50,6 +51,8 @@ namespace dx11_lessons
 		std::unique_ptr<mesh_buffer> text_mb{};
 
 		std::unique_ptr<constant_buffer> projection_cb{};
+
+		std::unique_ptr<camera> fp_cam{};
 		std::unique_ptr<constant_buffer> view_cb{};
 
 		std::unique_ptr<constant_buffer> cube_cb{};

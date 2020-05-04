@@ -25,6 +25,8 @@ namespace dx11_lessons
 
 		void process_messages();
 
+		// Which Direction to go in, returns 1, -1, or 0
+		auto which_button_is_down(input_button positive_button, input_button negative_button) const -> int8_t;
 		auto is_button_down(input_button button) const -> bool;
 		auto get_axis_value(input_axis axis) const -> int16_t;
 		auto get_axis_value(input_axis axis, bool absolute) const -> int16_t;

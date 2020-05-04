@@ -184,6 +184,12 @@ void raw_input::process_messages()
 	process_input(input_msg_count);
 }
 
+auto raw_input::which_button_is_down(input_button positive_button, input_button negative_button) const -> int8_t
+{
+	return (is_button_down(positive_button) ? 1 : 0)
+	     | (is_button_down(negative_button) ? -1 : 0);
+}
+
 auto raw_input::is_button_down(input_button button) const -> bool
 {
 	return buttons_down.at(static_cast<uint8_t>(button));
@@ -224,7 +230,8 @@ void raw_input::process_input(uint32_t count)
 				process_mouse_input(raw_data.data.mouse);
 				break;
 			default:
-				assert(false);
+				// Not sure what causes this to happen.
+				//assert(false);
 				break;
 		}
 	}

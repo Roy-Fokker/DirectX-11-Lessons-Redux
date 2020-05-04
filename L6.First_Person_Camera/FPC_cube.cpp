@@ -7,6 +7,7 @@
 #include "gpu_buffers.h"
 #include "gpu_datatypes.h"
 
+#include "camera.h"
 #include "raw_input.h"
 #include "clock.h"
 #include "helpers.h"
@@ -69,6 +70,7 @@ auto fpc_cube::exit() const -> bool
 void fpc_cube::update(const game_clock &clk, const raw_input &input)
 {
 	input_update(clk, input);
+	auto context = d3d->get_context();
 
 	auto cube_angle_text = std::wstring{};
 	// Rotate Cube
@@ -86,9 +88,22 @@ void fpc_cube::update(const game_clock &clk, const raw_input &input)
 		cube_pos.data = XMMatrixRotationY(angle);
 		cube_pos.data = XMMatrixTranspose(cube_pos.data);
 
-		cube_cb->update(d3d->get_context(),
+		cube_cb->update(context,
 		                sizeof(matrix),
 		                reinterpret_cast<const void *>(&cube_pos));
+	}
+
+	// Update Camera
+	{
+		auto view = view_matrix
+		{
+			XMMatrixTranspose(fp_cam->get_view()),
+			fp_cam->get_position()
+		};
+
+		view_cb->update(context,
+						sizeof(view_matrix),
+						reinterpret_cast<const void *>(&view));
 	}
 
 	// Update Text
@@ -302,15 +317,14 @@ void fpc_cube::create_contant_buffers(HWND hWnd)
 
 	// View
 	{
-		auto eye = XMVectorSet(0.0f, 2.0f, 5.0f, 0.0f),
-		     focus = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f),
-		     up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-		auto view = camera{ XMMatrixIdentity() };
-		view.matrix = XMMatrixLookAtLH(eye, focus, up);
-		view.matrix = XMMatrixTranspose(view.matrix);
-		XMStoreFloat3(&view.position, eye);
+		fp_cam = std::make_unique<camera>(XMFLOAT3{0.0f, 2.0f, 5.0f},
+		                                  XMFLOAT3{0.0f, 0.0f, 0.0f},
+		                                  XMFLOAT3{0.0f, 1.0f, 0.0f});
+		auto view = view_matrix{};
+		view.matrix = XMMatrixTranspose(fp_cam->get_view());
+		view.position = fp_cam->get_position();
 		view_cb = std::make_unique<constant_buffer>(device, stage::vertex, slot::view,
-		                                            sizeof(matrix),
+		                                            sizeof(view_matrix),
 		                                            reinterpret_cast<const void *>(&view));
 	}
 
@@ -338,8 +352,8 @@ void fpc_cube::create_contant_buffers(HWND hWnd)
 		auto light_data = light{};
 		light_data.diffuse = { 0.0f, 0.0f, 1.0f, 1.0f };
 		light_data.ambient = { 0.0f, 1.0f, 0.0f, 1.0f };
-		light_data.light_dir = { 0.0f, -3.0f, 3.0f };
-		light_data.specular_power = 1.0f;
+		light_data.light_pos = { 0.0f, 3.0f, 5.0f };
+		light_data.specular_power = 32.0f;
 		light_data.specular = { 1.0f, 0.0f, 0.0f, 1.0f };
 		light_cb = std::make_unique<constant_buffer>(device, stage::pixel, slot::light,
 		                                             sizeof(light),
@@ -383,8 +397,26 @@ void fpc_cube::create_shader_resources()
 
 void fpc_cube::input_update(const game_clock &clk, const raw_input &input)
 {
+	using btn = input_button;
+	using axis = input_axis;
+
 	if (input.is_button_down(input_button::escape))
 	{
 		stop_drawing = true;
+		return;
 	}
+
+	auto movement_speed = 1.0f * static_cast<float>(clk.get_delta_s());
+	auto dolly = input.which_button_is_down(btn::W, btn::S) * movement_speed;
+	auto pan = input.which_button_is_down(btn::D, btn::A) * movement_speed;
+	auto crane = input.which_button_is_down(btn::Q, btn::E) * movement_speed;
+
+	fp_cam->translate(dolly, pan, crane);
+
+	auto rotation_speed = 1.0f * static_cast<float>(clk.get_delta_s());
+	auto roll = rotation_speed * input.get_axis_value(axis::rx);
+	auto pitch = -rotation_speed * input.get_axis_value(axis::y);
+	auto yaw = -rotation_speed * input.get_axis_value(axis::x);
+
+	fp_cam->rotate(roll, pitch, yaw);
 }
