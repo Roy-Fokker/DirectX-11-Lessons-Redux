@@ -88,9 +88,7 @@ void fpc_cube::update(const game_clock &clk, const raw_input &input)
 		cube_pos.data = XMMatrixRotationY(angle);
 		cube_pos.data = XMMatrixTranspose(cube_pos.data);
 
-		cube_cb->update(context,
-		                sizeof(matrix),
-		                reinterpret_cast<const void *>(&cube_pos));
+		cube_cb->update(context, cube_pos);
 	}
 
 	// Update Camera
@@ -101,9 +99,7 @@ void fpc_cube::update(const game_clock &clk, const raw_input &input)
 			fp_cam->get_position()
 		};
 
-		view_cb->update(context,
-						sizeof(view_matrix),
-						reinterpret_cast<const void *>(&view));
+		view_cb->update(context, view);
 	}
 
 	// Update Text
@@ -310,9 +306,7 @@ void fpc_cube::create_contant_buffers(HWND hWnd)
 		auto projection = matrix{ XMMatrixIdentity() };
 		projection.data = XMMatrixPerspectiveFovLH(v_fov, aspect_ratio, near_z, far_z);
 		projection.data = XMMatrixTranspose(projection.data);
-		projection_cb = std::make_unique<constant_buffer>(device, stage::vertex, slot::projection,
-		                                                  sizeof(matrix),
-		                                                  reinterpret_cast<const void *>(&projection));
+		projection_cb = std::make_unique<constant_buffer>(device, stage::vertex, slot::projection, projection);
 	}
 
 	// View
@@ -323,18 +317,14 @@ void fpc_cube::create_contant_buffers(HWND hWnd)
 		auto view = view_matrix{};
 		view.matrix = XMMatrixTranspose(fp_cam->get_view());
 		view.position = fp_cam->get_position();
-		view_cb = std::make_unique<constant_buffer>(device, stage::vertex, slot::view,
-		                                            sizeof(view_matrix),
-		                                            reinterpret_cast<const void *>(&view));
+		view_cb = std::make_unique<constant_buffer>(device, stage::vertex, slot::view, view);
 	}
 
 	// Cube Transform
 	{
 		auto cube_pos = matrix{ XMMatrixTranslation(0.0f, 0.0f, 0.0f) };
 		cube_pos.data = XMMatrixTranspose(cube_pos.data);
-		cube_cb = std::make_unique<constant_buffer>(device, stage::vertex, slot::transform,
-		                                            sizeof(matrix),
-		                                            reinterpret_cast<const void *>(&cube_pos));
+		cube_cb = std::make_unique<constant_buffer>(device, stage::vertex, slot::transform, cube_pos);
 	}
 
 	// Text Transform
@@ -342,9 +332,7 @@ void fpc_cube::create_contant_buffers(HWND hWnd)
 		auto text_pos = matrix{ XMMatrixTranslation(3.0f, 0.0f, 0.0f) };
 		text_pos.data = XMMatrixRotationY(XMConvertToRadians(180.f)) * text_pos.data;
 		text_pos.data = XMMatrixTranspose(text_pos.data);
-		text_cb = std::make_unique<constant_buffer>(device, stage::vertex, slot::transform,
-		                                            sizeof(matrix),
-		                                            reinterpret_cast<const void *>(&text_pos));
+		text_cb = std::make_unique<constant_buffer>(device, stage::vertex, slot::transform, text_pos);
 	}
 
 	// Light
@@ -355,9 +343,7 @@ void fpc_cube::create_contant_buffers(HWND hWnd)
 		light_data.light_pos = { 0.0f, 3.0f, 5.0f };
 		light_data.specular_power = 32.0f;
 		light_data.specular = { 1.0f, 0.0f, 0.0f, 1.0f };
-		light_cb = std::make_unique<constant_buffer>(device, stage::pixel, slot::light,
-		                                             sizeof(light),
-		                                             reinterpret_cast<const void *>(&light_data));
+		light_cb = std::make_unique<constant_buffer>(device, stage::pixel, slot::light, light_data);
 	}
 }
 
@@ -406,7 +392,7 @@ void fpc_cube::input_update(const game_clock &clk, const raw_input &input)
 		return;
 	}
 
-	auto movement_speed = 1.0f * static_cast<float>(clk.get_delta_s());
+	auto movement_speed = 5.0f * static_cast<float>(clk.get_delta_s());
 	auto dolly = input.which_button_is_down(btn::W, btn::S) * movement_speed;
 	auto pan = input.which_button_is_down(btn::D, btn::A) * movement_speed;
 	auto crane = input.which_button_is_down(btn::Q, btn::E) * movement_speed;

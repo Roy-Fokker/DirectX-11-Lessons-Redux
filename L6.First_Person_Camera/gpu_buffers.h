@@ -47,6 +47,18 @@ namespace dx11_lessons
 	class constant_buffer
 	{
 	public:
+		template <class T>
+		constant_buffer(direct3d11::device_t device, shader_stage stage, shader_slot slot, const T &data_object) :
+			constant_buffer(device, stage, slot, sizeof(T), reinterpret_cast<const void *>(&data_object))
+		{};
+
+		template <class T>
+		void update(direct3d11::context_t context, const T &data_object)
+		{
+			update(context, sizeof(T), reinterpret_cast<const void *>(&data_object));
+		};
+
+	public:
 		constant_buffer() = delete;
 		constant_buffer(direct3d11::device_t device, shader_stage stage, shader_slot slot, 
 		                std::size_t buffer_size, const void *buffer_data);
