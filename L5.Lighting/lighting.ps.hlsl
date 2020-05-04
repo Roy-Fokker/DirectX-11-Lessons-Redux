@@ -5,7 +5,7 @@ cbuffer light_buffer : register (b0)
 {
 	float4 diffuse;
 	float4 ambient;
-	float3 light_dir;
+	float3 light_pos;
 	float specular_power;
 	float4 specular;
 };
@@ -20,10 +20,11 @@ struct PS_INPUT
 
 float4 main(PS_INPUT input) : SV_TARGET
 {
-	float light_intensity = saturate(dot(input.nor, light_dir));
+	float light_intensity = saturate(dot(input.nor, light_pos));
 
-	float3 reflection = normalize(2 * light_intensity * input.nor - light_dir);
-	float4 spec_col = pow(saturate(dot(reflection, input.eye_pos)), specular_power);
+	float3 reflection = normalize(2 * light_intensity * input.nor - light_pos);
+	float3 view_dir = input.eye_pos - input.pos;
+	float4 spec_col = specular * pow(saturate(dot(reflection, view_dir)), specular_power);
 
 	float4 tex_color = textureObj.Sample(sampleState, input.uv);
 

@@ -43,7 +43,7 @@ namespace dx11_lessons
 	{
 		DirectX::XMFLOAT4 diffuse;
 		DirectX::XMFLOAT4 ambient;
-		DirectX::XMFLOAT3 light_dir;
+		DirectX::XMFLOAT3 light_pos;
 		float specular_power;
 		DirectX::XMFLOAT4 specular;
 	};
