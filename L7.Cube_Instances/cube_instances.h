@@ -31,9 +31,25 @@ namespace dx11_lessons
 
 	private:
 		void create_pipeline_state_object();
+		void make_default_ps();
+		void make_light_ps();
+		void make_text_ps();
+
 		void create_mesh_buffers();
+		void make_cube_mesh();
+		void make_text_mesh();
+
 		void create_contant_buffers();
+		void make_prespective_cb();
+		void make_orthographic_cb();
+		void make_view_cb();
+		void make_cube_transform_cb();
+		void make_text_transform_cb();
+		void make_light_data_cb();
+
 		void create_shader_resources();
+		void make_cube_texture();
+		void make_text_texture();
 
 		void input_update(const game_clock &clk, const raw_input &input);
 
