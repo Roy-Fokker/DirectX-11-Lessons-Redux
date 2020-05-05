@@ -137,7 +137,7 @@ void cube_instances::render()
 	rp->activate(context);
 	rp->clear(context, clear_color);
 
-	projection_cb->activate(context);
+	prespective_proj_cb->activate(context);
 	view_cb->activate(context);
 
 	light_ps->activate(context);
@@ -147,7 +147,8 @@ void cube_instances::render()
 	cube_mb->activate(context);
 	cube_mb->draw(context);
 
-	ps->activate(context);
+	orthographic_proj_cb->activate(context);
+	screen_text_ps->activate(context);
 	text_cb->activate(context);
 	text_sr->activate(context);
 	text_mb->activate(context);
@@ -158,7 +159,9 @@ void cube_instances::render()
 
 void cube_instances::create_pipeline_state_object()
 {
+	auto device = d3d->get_device();
 	auto vso = load_binary_file(L"vertex_shader.cso"),
+	     screen_text_vso = load_binary_file(L"screen_space_text.vs.cso"),
 	     basic_pso = load_binary_file(L"pixel_shader.cso"),
 	     light_pso = load_binary_file(L"lighting.ps.cso");
 
@@ -174,7 +177,7 @@ void cube_instances::create_pipeline_state_object()
 		D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST
 	};
 
-	ps = std::make_unique<pipeline_state>(d3d->get_device(), desc);
+	ps = std::make_unique<pipeline_state>(device, desc);
 
 	auto light_desc = pipeline_state::description
 	{
@@ -188,7 +191,20 @@ void cube_instances::create_pipeline_state_object()
 		D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST
 	};
 
-	light_ps = std::make_unique<pipeline_state>(d3d->get_device(), light_desc);
+	light_ps = std::make_unique<pipeline_state>(device, light_desc);
+
+	auto screen_text_desc = pipeline_state::description
+	{
+		bs::opaque,
+		ds::none,
+		rs::cull_anti_clockwise,
+		ss::anisotropic_clamp,
+		vertex_elements,
+		screen_text_vso,
+		basic_pso,
+		D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST
+	};
+	screen_text_ps = std::make_unique<pipeline_state>(device, screen_text_desc);
 }
 
 void cube_instances::create_mesh_buffers()
@@ -268,8 +284,8 @@ void cube_instances::create_mesh_buffers()
 
 	// Rectangle mesh
 	{
-		auto l = 1.0f,
-		     w = 1.0f;
+		auto l = 64.0f,
+		     w = 64.0f;
 		auto rect_mesh = mesh{
 			// Vertex List
 			{
@@ -295,18 +311,22 @@ void cube_instances::create_contant_buffers(HWND hWnd)
 	using slot = shader_slot;
 	using stage = shader_stage;
 	auto device = d3d->get_device();
+	auto [width, height] = get_window_size(hWnd);
 
 	// Projection
 	{
-		auto [width, height] = get_window_size(hWnd);
 		auto aspect_ratio = width / static_cast<float>(height);
 		auto h_fov = XMConvertToRadians(field_of_view);
 		auto v_fov = 2.0f * std::atan(std::tan(h_fov / 2.0f) * aspect_ratio);
 
-		auto projection = matrix{ XMMatrixIdentity() };
+		auto projection = matrix{};
 		projection.data = XMMatrixPerspectiveFovLH(v_fov, aspect_ratio, near_z, far_z);
 		projection.data = XMMatrixTranspose(projection.data);
-		projection_cb = std::make_unique<constant_buffer>(device, stage::vertex, slot::projection, projection);
+		prespective_proj_cb = std::make_unique<constant_buffer>(device, stage::vertex, slot::projection, projection);
+
+		projection.data = XMMatrixOrthographicLH(width, height, -1.0f, 1.0f);
+		projection.data = XMMatrixTranspose(projection.data);
+		orthographic_proj_cb = std::make_unique<constant_buffer>(device, stage::vertex, slot::projection, projection);
 	}
 
 	// View
@@ -329,8 +349,10 @@ void cube_instances::create_contant_buffers(HWND hWnd)
 
 	// Text Transform
 	{
-		auto text_pos = matrix{ XMMatrixTranslation(3.0f, 0.0f, 0.0f) };
-		text_pos.data = XMMatrixRotationY(XMConvertToRadians(180.f)) * text_pos.data;
+		auto x = -width / 2.0f + 64.0f,
+			y = height / 2.0f - 64.0f;
+		auto text_pos = matrix{ XMMatrixTranslation(x, y, 0.0f) };
+		//text_pos.data = XMMatrixRotationY(XMConvertToRadians(180.f)) * text_pos.data;
 		text_pos.data = XMMatrixTranspose(text_pos.data);
 		text_cb = std::make_unique<constant_buffer>(device, stage::vertex, slot::transform, text_pos);
 	}

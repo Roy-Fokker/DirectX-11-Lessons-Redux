@@ -46,11 +46,13 @@ namespace dx11_lessons
 
 		std::unique_ptr<pipeline_state> ps{};
 		std::unique_ptr<pipeline_state> light_ps{};
+		std::unique_ptr<pipeline_state> screen_text_ps{};
 
 		std::unique_ptr<mesh_buffer> cube_mb{};
 		std::unique_ptr<mesh_buffer> text_mb{};
 
-		std::unique_ptr<constant_buffer> projection_cb{};
+		std::unique_ptr<constant_buffer> prespective_proj_cb{};
+		std::unique_ptr<constant_buffer> orthographic_proj_cb{};
 
 		std::unique_ptr<camera> fp_cam{};
 		std::unique_ptr<constant_buffer> view_cb{};
