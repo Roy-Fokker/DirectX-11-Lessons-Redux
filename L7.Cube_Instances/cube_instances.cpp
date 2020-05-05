@@ -25,7 +25,7 @@ namespace
 {
 	constexpr auto enable_vSync{ true };
 	constexpr auto clear_color = std::array{ 0.2f, 0.2f, 0.2f, 1.0f };
-	const auto d2d_clear_color = D2D1::ColorF(D2D1::ColorF::Beige);
+	const auto d2d_clear_color = D2D1::ColorF(D2D1::ColorF::Black, 0.0f);
 	constexpr auto field_of_view = 60.0f;
 	constexpr auto near_z = 0.1f;
 	constexpr auto far_z = 100.0f;
@@ -37,7 +37,8 @@ namespace
 	using ie = pipeline_state::input_element_type;
 }
 
-cube_instances::cube_instances(HWND hWnd)
+cube_instances::cube_instances(HWND hwnd) :
+	hWnd{ hwnd }
 {
 	d3d = std::make_unique<direct3d11>(hWnd);
 	d2d = std::make_unique<direct2d1>(d3d->get_dxgi_device());
@@ -45,7 +46,7 @@ cube_instances::cube_instances(HWND hWnd)
 
 	create_pipeline_state_object();
 	create_mesh_buffers();
-	create_contant_buffers(hWnd);
+	create_contant_buffers();
 	create_shader_resources();
 }
 
@@ -69,6 +70,7 @@ auto cube_instances::exit() const -> bool
 
 void cube_instances::update(const game_clock &clk, const raw_input &input)
 {
+	auto [width, height] = get_window_size(hWnd);
 	input_update(clk, input);
 	auto context = d3d->get_context();
 
@@ -107,7 +109,7 @@ void cube_instances::update(const game_clock &clk, const raw_input &input)
 		static auto fps = 0.0;
 		static long frame_count = 0;
 		static auto total_time = 0.0;
-		static auto fps_text = std::wstring{};
+		static auto fps_text = std::wstring{L"FPS: 0000.00\nAngle: 000.00"};
 
 		total_time += clk.get_delta_s();
 		frame_count++;
@@ -117,15 +119,17 @@ void cube_instances::update(const game_clock &clk, const raw_input &input)
 			frame_count = 0;
 			total_time = 0.0;
 
-			fps_text = fmt::format(L"FPS: {:.2f}", fps);
+			fps_text = fmt::format(L"FPS: {:.2f}\n{}", fps, cube_angle_text);
 		}
 
-		auto format = d2d->make_text_format(L"Consolas", 75.0f);
-		auto brush = d2d->make_solid_color_brush(D2D1::ColorF(D2D1::ColorF::Black));
+		auto format = d2d->make_text_format(L"Consolas", 12.0f);
+		auto brush = d2d->make_solid_color_brush(D2D1::ColorF(D2D1::ColorF::Yellow));
 
 		d2d->begin_draw(text_sr->get_dxgi_surface(), d2d_clear_color);
-		d2d->draw_text(fps_text, { 10, 10 }, { 512, 512 }, format, brush);
-		d2d->draw_text(cube_angle_text, { 10, 250 }, { 512, 512 }, format, brush);
+		d2d->draw_text(fps_text, 
+		               { 10, 10 }, 
+		               { static_cast<float>(width), static_cast<float>(height) }, 
+		               format, brush);
 		d2d->end();
 	}
 }
@@ -195,8 +199,8 @@ void cube_instances::create_pipeline_state_object()
 
 	auto screen_text_desc = pipeline_state::description
 	{
-		bs::opaque,
-		ds::none,
+		bs::non_premultipled,
+		ds::read_write,
 		rs::cull_anti_clockwise,
 		ss::anisotropic_clamp,
 		vertex_elements,
@@ -284,8 +288,9 @@ void cube_instances::create_mesh_buffers()
 
 	// Rectangle mesh
 	{
-		auto l = 64.0f,
-		     w = 64.0f;
+		auto [width, height] = get_window_size(hWnd);
+		auto l = width / 2.0f,
+		     w = height / 2.0f;
 		auto rect_mesh = mesh{
 			// Vertex List
 			{
@@ -306,7 +311,7 @@ void cube_instances::create_mesh_buffers()
 	}
 }
 
-void cube_instances::create_contant_buffers(HWND hWnd)
+void cube_instances::create_contant_buffers()
 {
 	using slot = shader_slot;
 	using stage = shader_stage;
@@ -349,10 +354,7 @@ void cube_instances::create_contant_buffers(HWND hWnd)
 
 	// Text Transform
 	{
-		auto x = -width / 2.0f + 64.0f,
-			y = height / 2.0f - 64.0f;
-		auto text_pos = matrix{ XMMatrixTranslation(x, y, 0.0f) };
-		//text_pos.data = XMMatrixRotationY(XMConvertToRadians(180.f)) * text_pos.data;
+		auto text_pos = matrix{ XMMatrixTranslation(0.0f, 0.0f, 0.0f) };
 		text_pos.data = XMMatrixTranspose(text_pos.data);
 		text_cb = std::make_unique<constant_buffer>(device, stage::vertex, slot::transform, text_pos);
 	}
@@ -383,9 +385,10 @@ void cube_instances::create_shader_resources()
 	
 	// Create Texture for Direct 2D and Direct Write
 	{
+		auto [width, height] = get_window_size(hWnd);
 		auto td = D3D11_TEXTURE2D_DESC{};
-		td.Width = 512;
-		td.Height = 512;
+		td.Width = width;
+		td.Height = height;
 		td.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 		td.Usage = D3D11_USAGE_DEFAULT;
 		td.Format = DXGI_FORMAT_R8G8B8A8_UNORM;

@@ -32,12 +32,13 @@ namespace dx11_lessons
 	private:
 		void create_pipeline_state_object();
 		void create_mesh_buffers();
-		void create_contant_buffers(HWND hWnd);
+		void create_contant_buffers();
 		void create_shader_resources();
 
 		void input_update(const game_clock &clk, const raw_input &input);
 
 	private:
+		HWND hWnd;
 		bool stop_drawing{ false };
 
 		std::unique_ptr<direct3d11> d3d{};
