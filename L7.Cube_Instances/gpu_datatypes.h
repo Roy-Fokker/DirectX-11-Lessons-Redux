@@ -32,11 +32,29 @@ namespace dx11_lessons
 		DirectX::XMMATRIX data;
 	};
 
+	struct instanced_mesh
+	{
+		std::vector<vertex> vertices;
+		std::vector<uint32_t> indicies;
+		std::vector<matrix> instance_transforms;
+	};
+
+	static const auto instanced_vertex_elements = std::vector<pipeline_state::input_element_type>
+	{
+		pipeline_state::input_element_type::position,
+		pipeline_state::input_element_type::normal,
+		pipeline_state::input_element_type::texcoord,
+
+		pipeline_state::input_element_type::instance_float4,
+		pipeline_state::input_element_type::instance_float4,
+		pipeline_state::input_element_type::instance_float4,
+		pipeline_state::input_element_type::instance_float4,
+	};
+
 	struct view_matrix
 	{
 		DirectX::XMMATRIX matrix;
 		DirectX::XMVECTOR position;
-		float padding;
 	};
 
 	struct light

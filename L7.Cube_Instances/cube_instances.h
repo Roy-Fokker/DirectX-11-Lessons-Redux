@@ -24,8 +24,8 @@ namespace dx11_lessons
 		~cube_instances();
 
 		auto on_resize(uintptr_t wParam, uintptr_t lParam) -> bool;
-
 		auto exit() const -> bool;
+
 		void update(const game_clock &clk, const raw_input &input);
 		void render();
 
@@ -34,11 +34,13 @@ namespace dx11_lessons
 		void make_default_ps();
 		void make_light_ps();
 		void make_text_ps();
+		void make_cube_instance_ps();
 
 		void create_mesh_buffers();
 		void make_cube_mesh();
+		void make_cube_instance_mesh();
 		void make_text_mesh();
-
+		
 		void create_contant_buffers();
 		void make_prespective_cb();
 		void make_orthographic_cb();
@@ -52,6 +54,9 @@ namespace dx11_lessons
 		void make_text_texture();
 
 		void input_update(const game_clock &clk, const raw_input &input);
+		void cube_update(const game_clock &clk);
+		void camera_update();
+		void text_update(const game_clock &clk);
 
 	private:
 		HWND hWnd;
@@ -64,9 +69,11 @@ namespace dx11_lessons
 		std::unique_ptr<pipeline_state> ps{};
 		std::unique_ptr<pipeline_state> light_ps{};
 		std::unique_ptr<pipeline_state> screen_text_ps{};
+		std::unique_ptr<pipeline_state> cube_instance_ps{};
 
 		std::unique_ptr<mesh_buffer> cube_mb{};
 		std::unique_ptr<mesh_buffer> text_mb{};
+		std::unique_ptr<mesh_buffer> cube_instance_mb{};
 
 		std::unique_ptr<constant_buffer> prespective_proj_cb{};
 		std::unique_ptr<constant_buffer> orthographic_proj_cb{};
@@ -74,6 +81,7 @@ namespace dx11_lessons
 		std::unique_ptr<camera> fp_cam{};
 		std::unique_ptr<constant_buffer> view_cb{};
 
+		float cube_angle{};
 		std::unique_ptr<constant_buffer> cube_cb{};
 		std::unique_ptr<constant_buffer> light_cb{};
 

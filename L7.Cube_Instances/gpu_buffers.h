@@ -29,19 +29,23 @@ namespace dx11_lessons
 	public:
 		mesh_buffer() = delete;
 		mesh_buffer(direct3d11::device_t device, const mesh &data);
+		mesh_buffer(direct3d11::device_t device, const instanced_mesh &data);
 		~mesh_buffer();
 
+		void update_instances(direct3d11::context_t context);
 		void activate(direct3d11::context_t context);
 		void draw(direct3d11::context_t context);
 
 	private:
-		CComPtr<ID3D11Buffer> vertex_buffer,
-		                      index_buffer;
+		using buffer_t = CComPtr<ID3D11Buffer>;
+		std::vector<buffer_t> vertex_buffers{};
+		std::vector<uint32_t> buffer_strides{},
+		                      buffer_offsets{};
 
+		buffer_t index_buffer;
 		uint32_t index_count{},
 		         index_offset{},
-		         vertex_size{},
-		         vertex_offset{};
+		         instance_count{};
 	};
 
 	class constant_buffer

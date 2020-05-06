@@ -25,7 +25,8 @@ namespace
 #pragma region Mesh Buffer
 mesh_buffer::mesh_buffer(device_t device, const mesh &data) :
 	index_count{ static_cast<uint32_t>(data.indicies.size()) },
-	vertex_size{ sizeof(data.vertices.back()) }
+	buffer_strides{ sizeof(data.vertices.back()) }, 
+	buffer_offsets{ 0 }
 {
 	auto &vertices = data.vertices;
 	auto &indicies = data.indicies;
@@ -37,9 +38,9 @@ mesh_buffer::mesh_buffer(device_t device, const mesh &data) :
 	auto srd = D3D11_SUBRESOURCE_DATA{};
 
 	desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	desc.ByteWidth = static_cast<uint32_t>(vertices.size()) * vertex_size;
+	desc.ByteWidth = static_cast<uint32_t>(vertices.size()) * buffer_strides.at(0);
 	srd.pSysMem = reinterpret_cast<const void *>(vertices.data());
-	vertex_buffer = make_gpu_buffer(device, desc, srd);
+	vertex_buffers.push_back( make_gpu_buffer(device, desc, srd) );
 
 	desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	desc.ByteWidth = index_count * sizeof(uint32_t);
@@ -47,18 +48,56 @@ mesh_buffer::mesh_buffer(device_t device, const mesh &data) :
 	index_buffer = make_gpu_buffer(device, desc, srd);
 }
 
+mesh_buffer::mesh_buffer(direct3d11::device_t device, const instanced_mesh &data) :
+	mesh_buffer(device, mesh{ data.vertices, data.indicies })
+{
+	buffer_strides.push_back(sizeof(data.instance_transforms.back()));
+	buffer_offsets.push_back(0);
+	instance_count = static_cast<uint32_t>(data.instance_transforms.size());
+
+	auto &transforms = data.instance_transforms;
+
+	auto desc = D3D11_BUFFER_DESC{};
+	desc.Usage = D3D11_USAGE_DYNAMIC;
+	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	desc.ByteWidth = instance_count * buffer_strides.at(1);
+
+	auto srd = D3D11_SUBRESOURCE_DATA{};
+	srd.pSysMem = reinterpret_cast<const void *>(transforms.data());
+	vertex_buffers.push_back(make_gpu_buffer(device, desc, srd));
+}
+
 mesh_buffer::~mesh_buffer() = default;
+
+void mesh_buffer::update_instances(direct3d11::context_t context)
+{}
 
 void mesh_buffer::activate(context_t context)
 {
-	ID3D11Buffer *const vb[] = { vertex_buffer.p };
-	context->IASetVertexBuffers(0, 1, vb, &vertex_size, &vertex_offset);
+	auto buffers = std::vector<ID3D11Buffer *const *>{};
+	for (auto &vb : vertex_buffers)
+	{
+		buffers.push_back(&vb.p);
+	}
+	context->IASetVertexBuffers(0, 
+	                            static_cast<uint32_t>(buffers.size()), 
+	                            buffers[0], 
+	                            buffer_strides.data(), 
+	                            buffer_offsets.data());
 	context->IASetIndexBuffer(index_buffer.p, DXGI_FORMAT_R32_UINT, index_offset);
 }
 
 void mesh_buffer::draw(context_t context)
 {
-	context->DrawIndexed(index_count, 0, 0);
+	if (vertex_buffers.size() == 1)
+	{
+		context->DrawIndexed(index_count, 0, 0);
+	}
+	else
+	{
+		context->DrawIndexedInstanced(index_count, instance_count, 0, 0, 0);
+	}
 }
 #pragma endregion
 

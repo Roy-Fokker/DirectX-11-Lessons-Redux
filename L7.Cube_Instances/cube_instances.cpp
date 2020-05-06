@@ -12,6 +12,7 @@
 #include "clock.h"
 #include "helpers.h"
 
+#include <cppitertools\enumerate.hpp>
 #include <fmt/core.h>
 #include <DirectXMath.h>
 #include <array>
@@ -76,68 +77,10 @@ auto cube_instances::exit() const -> bool
 
 void cube_instances::update(const game_clock &clk, const raw_input &input)
 {
-	auto [width, height] = get_window_size(hWnd);
 	input_update(clk, input);
-	auto context = d3d->get_context();
-
-	auto cube_angle_text = std::wstring{};
-	// Rotate Cube
-	{
-		static auto angle_deg = 0.0;
-		angle_deg += 90.0f * clk.get_delta_s();
-		if (angle_deg >= 360.0f)
-		{
-			angle_deg -= 360.0f;
-		}
-		cube_angle_text = fmt::format(L"Angle: {:06.2f}", angle_deg);
-
-		auto angle = XMConvertToRadians(static_cast<float>(angle_deg));
-		auto cube_pos = matrix{ XMMatrixIdentity() };
-		cube_pos.data = XMMatrixRotationY(angle);
-		cube_pos.data = XMMatrixTranspose(cube_pos.data);
-
-		cube_cb->update(context, cube_pos);
-	}
-
-	// Update Camera
-	{
-		auto view = view_matrix
-		{
-			XMMatrixTranspose(fp_cam->get_view()),
-			fp_cam->get_position()
-		};
-
-		view_cb->update(context, view);
-	}
-
-	// Update Text
-	{
-		static auto fps = 0.0;
-		static long frame_count = 0;
-		static auto total_time = 0.0;
-		static auto fps_text = std::wstring{L"FPS: 0000.00\nAngle: 000.00"};
-
-		total_time += clk.get_delta_s();
-		frame_count++;
-		if (total_time > 1.0)
-		{
-			fps = frame_count / total_time;
-			frame_count = 0;
-			total_time = 0.0;
-
-			fps_text = fmt::format(L"FPS: {:.2f}\n{}", fps, cube_angle_text);
-		}
-
-		auto format = d2d->make_text_format(L"Consolas", 12.0f);
-		auto brush = d2d->make_solid_color_brush(D2D1::ColorF(D2D1::ColorF::Yellow));
-
-		d2d->begin_draw(text_sr->get_dxgi_surface(), d2d_clear_color);
-		d2d->draw_text(fps_text, 
-		               { 10, 10 }, 
-		               { static_cast<float>(width), static_cast<float>(height) }, 
-		               format, brush);
-		d2d->end();
-	}
+	cube_update(clk);
+	camera_update();
+	text_update(clk);
 }
 
 void cube_instances::render()
@@ -157,6 +100,10 @@ void cube_instances::render()
 	cube_mb->activate(context);
 	cube_mb->draw(context);
 
+	cube_instance_ps->activate(context);
+	cube_instance_mb->activate(context);
+	cube_instance_mb->draw(context);
+
 	orthographic_proj_cb->activate(context);
 	screen_text_ps->activate(context);
 	text_cb->activate(context);
@@ -172,6 +119,7 @@ void cube_instances::create_pipeline_state_object()
 	make_default_ps();
 	make_light_ps();
 	make_text_ps();
+	make_cube_instance_ps();
 }
 
 void cube_instances::make_default_ps()
@@ -235,10 +183,31 @@ void cube_instances::make_text_ps()
 	screen_text_ps = std::make_unique<pipeline_state>(device, screen_text_desc);
 }
 
+void cube_instances::make_cube_instance_ps()
+{
+	auto device = d3d->get_device();
+	auto vso = load_binary_file(L"cube_instances.vs.cso"),
+	     basic_pso = load_binary_file(L"pixel_shader.cso");
+
+	auto desc = pipeline_state::description
+	{
+		bs::opaque,
+		ds::read_write,
+		rs::cull_anti_clockwise,
+		ss::anisotropic_clamp,
+		instanced_vertex_elements,
+		vso,
+		basic_pso,
+		D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST
+	};
+	cube_instance_ps = std::make_unique<pipeline_state>(device, desc);
+}
+
 void cube_instances::create_mesh_buffers()
 {
 	make_cube_mesh();
 	make_text_mesh();
+	make_cube_instance_mesh();
 }
 
 void cube_instances::make_cube_mesh()
@@ -311,6 +280,90 @@ void cube_instances::make_cube_mesh()
 	};
 
 	cube_mb = std::make_unique<mesh_buffer>(device, cube_mesh);
+}
+
+void cube_instances::make_cube_instance_mesh()
+{
+	auto device = d3d->get_device();
+	auto l = 1.0f,
+		w = 1.0f,
+		h = 1.0f;
+
+	auto front_normal = XMFLOAT3{ 0.0f, 0.0f, 1.0f }, back_normal = XMFLOAT3{ 0.0f,  0.0f, -1.0f },
+		left_normal = XMFLOAT3{ -1.0f, 0.0f, 0.0f }, right_normal = XMFLOAT3{ 1.0f,  0.0f,  0.0f },
+		top_normal = XMFLOAT3{ 0.0f, 1.0f, 0.0f }, bottom_normal = XMFLOAT3{ 0.0f, -1.0f,  0.0f };
+
+	auto cube_mesh = instanced_mesh{
+		// Vertex List
+		{
+			// Front
+			{ { -l, -w, +h }, front_normal, { 0.0f, 0.0f } },
+			{ { +l, -w, +h }, front_normal, { 1.0f, 0.0f } },
+			{ { +l, +w, +h }, front_normal, { 1.0f, 1.0f } },
+			{ { -l, +w, +h }, front_normal, { 0.0f, 1.0f } },
+
+			// Bottom
+			{ { -l, -w, -h }, bottom_normal, { 0.0f, 0.0f } },
+			{ { +l, -w, -h }, bottom_normal, { 1.0f, 0.0f } },
+			{ { +l, -w, +h }, bottom_normal, { 1.0f, 1.0f } },
+			{ { -l, -w, +h }, bottom_normal, { 0.0f, 1.0f } },
+
+			// Right
+			{ { +l, -w, -h }, right_normal, { 0.0f, 0.0f } },
+			{ { +l, +w, -h }, right_normal, { 1.0f, 0.0f } },
+			{ { +l, +w, +h }, right_normal, { 1.0f, 1.0f } },
+			{ { +l, -w, +h }, right_normal, { 0.0f, 1.0f } },
+
+			// Left
+			{ { -l, -w, -h }, left_normal, { 0.0f, 0.0f } },
+			{ { -l, -w, +h }, left_normal, { 1.0f, 0.0f } },
+			{ { -l, +w, +h }, left_normal, { 1.0f, 1.0f } },
+			{ { -l, +w, -h }, left_normal, { 0.0f, 1.0f } },
+
+			// Back
+			{ { -l, -w, -h }, back_normal, { 0.0f, 0.0f } },
+			{ { -l, +w, -h }, back_normal, { 1.0f, 0.0f } },
+			{ { +l, +w, -h }, back_normal, { 1.0f, 1.0f } },
+			{ { +l, -w, -h }, back_normal, { 0.0f, 1.0f } },
+
+			// Top
+			{ { -l, +w, -h }, top_normal, { 0.0f, 0.0f } },
+			{ { -l, +w, +h }, top_normal, { 1.0f, 0.0f } },
+			{ { +l, +w, +h }, top_normal, { 1.0f, 1.0f } },
+			{ { +l, +w, -h }, top_normal, { 0.0f, 1.0f } },
+		},
+
+
+		// Index List
+		{
+			// Front
+			0, 1, 2, 0, 2, 3,
+			// Bottom
+			4, 5, 6, 4, 6, 7,
+			// Right
+			8, 9, 10, 8, 10, 11,
+			// Left
+			12, 13, 14, 12, 14, 15,
+			// Back
+			16, 17, 18, 16, 18, 19,
+			// Top
+			20, 21, 22, 20, 22, 23,
+		}
+	};
+
+	cube_mesh.instance_transforms.resize(100);
+	for (auto &&[idx, transform] : cube_mesh.instance_transforms | iter::enumerate)
+	{
+		auto i = static_cast<int>(idx);
+		constexpr auto x_max = 10;
+		float x = -15.0f + 3.0f * (i % x_max),
+		      z = -30.0f + 3.0f * (i / x_max);
+
+		transform.data = XMMatrixTranslation(x, 0.0f, z);
+		transform.data = XMMatrixTranspose(transform.data);
+	}
+
+	cube_instance_mb = std::make_unique<mesh_buffer>(device, cube_mesh);
 }
 
 void cube_instances::make_text_mesh()
@@ -400,7 +453,7 @@ void cube_instances::make_cube_transform_cb()
 {
 	auto device = d3d->get_device();
 
-	auto cube_pos = matrix{ XMMatrixTranslation(0.0f, 0.0f, 0.0f) };
+	auto cube_pos = matrix{ XMMatrixTranslation(0.0f, 1.0f, 0.0f) };
 	cube_pos.data = XMMatrixTranspose(cube_pos.data);
 	cube_cb = std::make_unique<constant_buffer>(device, stage::vertex, slot::transform, cube_pos);
 
@@ -487,9 +540,73 @@ void cube_instances::input_update(const game_clock &clk, const raw_input &input)
 	fp_cam->translate(dolly, pan, crane);
 
 	auto rotation_speed = 1.0f * static_cast<float>(clk.get_delta_s());
-	auto roll = rotation_speed * input.get_axis_value(axis::rx);
+	auto roll = rotation_speed * input.get_axis_value(axis::rx) / 120.0f;
 	auto pitch = -rotation_speed * input.get_axis_value(axis::y);
 	auto yaw = -rotation_speed * input.get_axis_value(axis::x);
 
 	fp_cam->rotate(roll, pitch, yaw);
+}
+
+void cube_instances::cube_update(const game_clock &clk)
+{
+	auto [width, height] = get_window_size(hWnd);
+	auto context = d3d->get_context();
+
+	cube_angle += 90.0f * static_cast<float>(clk.get_delta_s());
+	if (cube_angle >= 360.0f)
+	{
+		cube_angle -= 360.0f;
+	}
+	
+	auto angle = XMConvertToRadians(cube_angle);
+	auto cube_pos = matrix{ XMMatrixIdentity() };
+	cube_pos.data = XMMatrixRotationY(angle);
+	cube_pos.data *= XMMatrixTranslation(0.0f, 1.0f, 0.0f);
+	cube_pos.data = XMMatrixTranspose(cube_pos.data);
+
+	cube_cb->update(context, cube_pos);
+}
+
+void cube_instances::camera_update()
+{
+	auto context = d3d->get_context();
+
+	auto view = view_matrix
+	{
+		XMMatrixTranspose(fp_cam->get_view()),
+		fp_cam->get_position()
+	};
+
+	view_cb->update(context, view);
+}
+
+void cube_instances::text_update(const game_clock &clk)
+{
+	static long frame_count = 0;
+	static auto total_time = 0.0;
+
+	total_time += clk.get_delta_s();
+	frame_count++;
+
+	if (total_time < 1.0)
+	{
+		return;
+	}
+
+	auto [width, height] = get_window_size(hWnd);
+	auto fps = frame_count / total_time;
+	frame_count = 0;
+	total_time = 0.0;
+
+	auto fps_text = fmt::format(L"FPS: {:.2f}\nAngle: {:06.2f}", fps, cube_angle);
+
+	auto format = d2d->make_text_format(L"Consolas", 12.0f);
+	auto brush = d2d->make_solid_color_brush(D2D1::ColorF(D2D1::ColorF::Yellow));
+
+	d2d->begin_draw(text_sr->get_dxgi_surface(), d2d_clear_color);
+	d2d->draw_text(fps_text,
+	               { 10, 10 },
+	               { static_cast<float>(width), static_cast<float>(height) },
+	               format, brush);
+	d2d->end();
 }

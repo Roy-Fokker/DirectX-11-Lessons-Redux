@@ -61,6 +61,7 @@ namespace dx11_lessons
 			normal,
 			color,
 			texcoord,
+			instance_float4,
 		};
 
 		struct description

@@ -82,10 +82,11 @@
     <FxCompile Include="screen_space_text.vs.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
+    <FxCompile Include="cube_instances.vs.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="uv_grid.dds">
-      <Filter>Resource Files</Filter>
-    </Image>
+    <CopyFileToFolders Include="uv_grid.dds" />
   </ItemGroup>
 </Project>
