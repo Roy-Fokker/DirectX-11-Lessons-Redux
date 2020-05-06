@@ -44,14 +44,14 @@ void camera::rotate(float roll, float pitch, float yaw)
 {
 	auto forward = rotate_vector(orientation, forward_vector);
 	auto left = rotate_vector(orientation, left_vector);
-	auto up = rotate_vector(orientation, up_vector);
+	auto up = up_vector;  // rotate_vector(orientation, up_vector);
 
 	auto rot_x = XMQuaternionRotationAxis(left, pitch);
 	auto rot_y = XMQuaternionRotationAxis(up, yaw);
 	auto rot_z = XMQuaternionRotationAxis(forward, roll);
 
 	orientation = XMQuaternionMultiply(rot_x, orientation);
-	orientation = XMQuaternionMultiply(orientation, rot_y);
+	orientation = XMQuaternionMultiply(rot_y, orientation);
 	orientation = XMQuaternionMultiply(rot_z, orientation);
 }
 
