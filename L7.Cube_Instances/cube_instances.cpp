@@ -80,6 +80,7 @@ void cube_instances::update(const game_clock &clk, const raw_input &input)
 	input_update(clk, input);
 	cube_update(clk);
 	camera_update();
+	cube_instance_update(clk);
 	text_update(clk);
 }
 
@@ -609,4 +610,24 @@ void cube_instances::text_update(const game_clock &clk)
 	               { static_cast<float>(width), static_cast<float>(height) },
 	               format, brush);
 	d2d->end();
+}
+
+void cube_instances::cube_instance_update(const game_clock &clk)
+{
+	auto transforms = std::vector<matrix>(100);
+
+	for (auto &&[idx, transform] : transforms | iter::enumerate)
+	{
+		auto i = static_cast<int>(idx);
+		constexpr auto x_max = 10;
+		auto x = -15.0f + 3.0f * (i % x_max),
+		     z = -30.0f + 3.0f * (i / x_max);
+		auto angle = XMConvertToRadians(cube_angle + (i * 10));
+		
+		transform.data = XMMatrixRotationZ(angle);
+		transform.data *= XMMatrixTranslation(x, 0.0f, z);
+		transform.data = XMMatrixTranspose(transform.data);
+	}
+
+	cube_instance_mb->update_instances(d3d->get_context(), transforms);
 }

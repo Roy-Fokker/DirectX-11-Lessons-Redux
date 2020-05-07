@@ -70,8 +70,25 @@ mesh_buffer::mesh_buffer(direct3d11::device_t device, const instanced_mesh &data
 
 mesh_buffer::~mesh_buffer() = default;
 
-void mesh_buffer::update_instances(direct3d11::context_t context)
-{}
+void mesh_buffer::update_instances(direct3d11::context_t context, const std::vector<matrix> &buffer_data)
+{
+	assert(instance_count >= buffer_data.size());
+
+	auto &buffer = vertex_buffers.at(1);
+	auto buffer_size = buffer_data.size() * buffer_strides.at(1);
+
+	auto gpu_buffer = D3D11_MAPPED_SUBRESOURCE{};
+	auto hr = context->Map(buffer.p,
+	                       NULL,
+	                       D3D11_MAP_WRITE_DISCARD,
+	                       NULL,
+	                       &gpu_buffer);
+	assert(SUCCEEDED(hr));
+
+	std::memcpy(gpu_buffer.pData, &buffer_data[0], buffer_size);
+
+	context->Unmap(buffer.p, NULL);
+}
 
 void mesh_buffer::activate(context_t context)
 {

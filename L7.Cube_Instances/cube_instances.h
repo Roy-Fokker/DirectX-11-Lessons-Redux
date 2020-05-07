@@ -57,6 +57,7 @@ namespace dx11_lessons
 		void cube_update(const game_clock &clk);
 		void camera_update();
 		void text_update(const game_clock &clk);
+		void cube_instance_update(const game_clock &clk);
 
 	private:
 		HWND hWnd;

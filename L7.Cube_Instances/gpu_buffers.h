@@ -32,7 +32,7 @@ namespace dx11_lessons
 		mesh_buffer(direct3d11::device_t device, const instanced_mesh &data);
 		~mesh_buffer();
 
-		void update_instances(direct3d11::context_t context);
+		void update_instances(direct3d11::context_t context, const std::vector<matrix> &data);
 		void activate(direct3d11::context_t context);
 		void draw(direct3d11::context_t context);
 
