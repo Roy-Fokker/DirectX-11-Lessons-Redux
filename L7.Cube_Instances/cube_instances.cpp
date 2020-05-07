@@ -31,6 +31,67 @@ namespace
 	constexpr auto near_z = 0.1f;
 	constexpr auto far_z = 100.0f;
 
+	constexpr auto front_normal = XMFLOAT3{ 0.0f, 0.0f, 1.0f }, back_normal = XMFLOAT3{ 0.0f,  0.0f, -1.0f };
+	constexpr auto left_normal = XMFLOAT3{ -1.0f, 0.0f, 0.0f }, right_normal = XMFLOAT3{ 1.0f,  0.0f,  0.0f };
+	constexpr auto top_normal = XMFLOAT3{ 0.0f, 1.0f, 0.0f }, bottom_normal = XMFLOAT3{ 0.0f, -1.0f,  0.0f };
+
+	const auto cube_base = mesh{
+		// Vertex List
+		{
+			// Front
+			{ { -1.0f, -1.0f, +1.0f }, front_normal, { 0.0f, 0.0f } },
+			{ { +1.0f, -1.0f, +1.0f }, front_normal, { 1.0f, 0.0f } },
+			{ { +1.0f, +1.0f, +1.0f }, front_normal, { 1.0f, 1.0f } },
+			{ { -1.0f, +1.0f, +1.0f }, front_normal, { 0.0f, 1.0f } },
+
+			// Bottom
+			{ { -1.0f, -1.0f, -1.0f }, bottom_normal, { 0.0f, 0.0f } },
+			{ { +1.0f, -1.0f, -1.0f }, bottom_normal, { 1.0f, 0.0f } },
+			{ { +1.0f, -1.0f, +1.0f }, bottom_normal, { 1.0f, 1.0f } },
+			{ { -1.0f, -1.0f, +1.0f }, bottom_normal, { 0.0f, 1.0f } },
+
+			// right
+			{ { +1.0f, -1.0f, -1.0f }, right_normal, { 0.0f, 0.0f } },
+			{ { +1.0f, +1.0f, -1.0f }, right_normal, { 1.0f, 0.0f } },
+			{ { +1.0f, +1.0f, +1.0f }, right_normal, { 1.0f, 1.0f } },
+			{ { +1.0f, -1.0f, +1.0f }, right_normal, { 0.0f, 1.0f } },
+
+			// left
+			{ { -1.0f, -1.0f, -1.0f }, left_normal, { 0.0f, 0.0f } },
+			{ { -1.0f, -1.0f, +1.0f }, left_normal, { 1.0f, 0.0f } },
+			{ { -1.0f, +1.0f, +1.0f }, left_normal, { 1.0f, 1.0f } },
+			{ { -1.0f, +1.0f, -1.0f }, left_normal, { 0.0f, 1.0f } },
+
+			// Back
+			{ { -1.0f, -1.0f, -1.0f }, back_normal, { 0.0f, 0.0f } },
+			{ { -1.0f, +1.0f, -1.0f }, back_normal, { 1.0f, 0.0f } },
+			{ { +1.0f, +1.0f, -1.0f }, back_normal, { 1.0f, 1.0f } },
+			{ { +1.0f, -1.0f, -1.0f }, back_normal, { 0.0f, 1.0f } },
+
+			// Top
+			{ { -1.0f, +1.0f, -1.0f }, top_normal, { 0.0f, 0.0f } },
+			{ { -1.0f, +1.0f, +1.0f }, top_normal, { 1.0f, 0.0f } },
+			{ { +1.0f, +1.0f, +1.0f }, top_normal, { 1.0f, 1.0f } },
+			{ { +1.0f, +1.0f, -1.0f }, top_normal, { 0.0f, 1.0f } },
+		},
+
+		// Index List
+		{
+			// Front
+			0, 1, 2, 0, 2, 3,
+			// Bottom
+			4, 5, 6, 4, 6, 7,
+			// Right
+			8, 9, 10, 8, 10, 11,
+			// Left
+			12, 13, 14, 12, 14, 15,
+			// Back
+			16, 17, 18, 16, 18, 19,
+			// Top
+			20, 21, 22, 20, 22, 23,
+		}
+	};
+
 	using bs = pipeline_state::blend_type;
 	using ds = pipeline_state::depth_stencil_type;
 	using rs = pipeline_state::rasterizer_type;
@@ -214,71 +275,8 @@ void cube_instances::create_mesh_buffers()
 void cube_instances::make_cube_mesh()
 {
 	auto device = d3d->get_device();
-	auto l = 1.0f,
-	     w = 1.0f,
-	     h = 1.0f;
-
-	auto front_normal = XMFLOAT3{ 0.0f, 0.0f, 1.0f },  back_normal   = XMFLOAT3{ 0.0f,  0.0f, -1.0f },
-	     left_normal  = XMFLOAT3{ -1.0f, 0.0f, 0.0f }, right_normal  = XMFLOAT3{ 1.0f,  0.0f,  0.0f },
-	     top_normal   = XMFLOAT3{ 0.0f, 1.0f, 0.0f },  bottom_normal = XMFLOAT3{ 0.0f, -1.0f,  0.0f };
-
-	auto cube_mesh = mesh{
-		// Vertex List
-		{
-			// Front
-			{ { -l, -w, +h }, front_normal, { 0.0f, 0.0f } },
-			{ { +l, -w, +h }, front_normal, { 1.0f, 0.0f } },
-			{ { +l, +w, +h }, front_normal, { 1.0f, 1.0f } },
-			{ { -l, +w, +h }, front_normal, { 0.0f, 1.0f } },
-
-			// Bottom
-			{ { -l, -w, -h }, bottom_normal, { 0.0f, 0.0f } },
-			{ { +l, -w, -h }, bottom_normal, { 1.0f, 0.0f } },
-			{ { +l, -w, +h }, bottom_normal, { 1.0f, 1.0f } },
-			{ { -l, -w, +h }, bottom_normal, { 0.0f, 1.0f } },
-
-			// Right
-			{ { +l, -w, -h }, right_normal, { 0.0f, 0.0f } },
-			{ { +l, +w, -h }, right_normal, { 1.0f, 0.0f } },
-			{ { +l, +w, +h }, right_normal, { 1.0f, 1.0f } },
-			{ { +l, -w, +h }, right_normal, { 0.0f, 1.0f } },
-
-			// Left
-			{ { -l, -w, -h }, left_normal, { 0.0f, 0.0f } },
-			{ { -l, -w, +h }, left_normal, { 1.0f, 0.0f } },
-			{ { -l, +w, +h }, left_normal, { 1.0f, 1.0f } },
-			{ { -l, +w, -h }, left_normal, { 0.0f, 1.0f } },
-
-			// Back
-			{ { -l, -w, -h }, back_normal, { 0.0f, 0.0f } },
-			{ { -l, +w, -h }, back_normal, { 1.0f, 0.0f } },
-			{ { +l, +w, -h }, back_normal, { 1.0f, 1.0f } },
-			{ { +l, -w, -h }, back_normal, { 0.0f, 1.0f } },
-
-			// Top
-			{ { -l, +w, -h }, top_normal, { 0.0f, 0.0f } },
-			{ { -l, +w, +h }, top_normal, { 1.0f, 0.0f } },
-			{ { +l, +w, +h }, top_normal, { 1.0f, 1.0f } },
-			{ { +l, +w, -h }, top_normal, { 0.0f, 1.0f } },
-		},
-
-
-		// Index List
-		{
-			// Front
-			0, 1, 2, 0, 2, 3,
-			// Bottom
-			4, 5, 6, 4, 6, 7,
-			// Right
-			8, 9, 10, 8, 10, 11,
-			// Left
-			12, 13, 14, 12, 14, 15,
-			// Back
-			16, 17, 18, 16, 18, 19,
-			// Top
-			20, 21, 22, 20, 22, 23,
-		}
-	};
+	
+	auto cube_mesh = cube_base;
 
 	cube_mb = std::make_unique<mesh_buffer>(device, cube_mesh);
 }
@@ -295,61 +293,8 @@ void cube_instances::make_cube_instance_mesh()
 		top_normal = XMFLOAT3{ 0.0f, 1.0f, 0.0f }, bottom_normal = XMFLOAT3{ 0.0f, -1.0f,  0.0f };
 
 	auto cube_mesh = instanced_mesh{
-		// Vertex List
-		{
-			// Front
-			{ { -l, -w, +h }, front_normal, { 0.0f, 0.0f } },
-			{ { +l, -w, +h }, front_normal, { 1.0f, 0.0f } },
-			{ { +l, +w, +h }, front_normal, { 1.0f, 1.0f } },
-			{ { -l, +w, +h }, front_normal, { 0.0f, 1.0f } },
-
-			// Bottom
-			{ { -l, -w, -h }, bottom_normal, { 0.0f, 0.0f } },
-			{ { +l, -w, -h }, bottom_normal, { 1.0f, 0.0f } },
-			{ { +l, -w, +h }, bottom_normal, { 1.0f, 1.0f } },
-			{ { -l, -w, +h }, bottom_normal, { 0.0f, 1.0f } },
-
-			// Right
-			{ { +l, -w, -h }, right_normal, { 0.0f, 0.0f } },
-			{ { +l, +w, -h }, right_normal, { 1.0f, 0.0f } },
-			{ { +l, +w, +h }, right_normal, { 1.0f, 1.0f } },
-			{ { +l, -w, +h }, right_normal, { 0.0f, 1.0f } },
-
-			// Left
-			{ { -l, -w, -h }, left_normal, { 0.0f, 0.0f } },
-			{ { -l, -w, +h }, left_normal, { 1.0f, 0.0f } },
-			{ { -l, +w, +h }, left_normal, { 1.0f, 1.0f } },
-			{ { -l, +w, -h }, left_normal, { 0.0f, 1.0f } },
-
-			// Back
-			{ { -l, -w, -h }, back_normal, { 0.0f, 0.0f } },
-			{ { -l, +w, -h }, back_normal, { 1.0f, 0.0f } },
-			{ { +l, +w, -h }, back_normal, { 1.0f, 1.0f } },
-			{ { +l, -w, -h }, back_normal, { 0.0f, 1.0f } },
-
-			// Top
-			{ { -l, +w, -h }, top_normal, { 0.0f, 0.0f } },
-			{ { -l, +w, +h }, top_normal, { 1.0f, 0.0f } },
-			{ { +l, +w, +h }, top_normal, { 1.0f, 1.0f } },
-			{ { +l, +w, -h }, top_normal, { 0.0f, 1.0f } },
-		},
-
-
-		// Index List
-		{
-			// Front
-			0, 1, 2, 0, 2, 3,
-			// Bottom
-			4, 5, 6, 4, 6, 7,
-			// Right
-			8, 9, 10, 8, 10, 11,
-			// Left
-			12, 13, 14, 12, 14, 15,
-			// Back
-			16, 17, 18, 16, 18, 19,
-			// Top
-			20, 21, 22, 20, 22, 23,
-		}
+		cube_base.vertices, 
+		cube_base.indicies
 	};
 
 	cube_mesh.instance_transforms.resize(100);

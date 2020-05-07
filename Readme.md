@@ -26,6 +26,7 @@ Library dependencies are installed via [vcpkg](https://github.com/microsoft/vcpk
 - L2.Draw_Cube: Draw a cube, use VS, PS and prespective projection.
 - L3.Textured_Cube: Draw a cube with textured faces.
 - L4.Direct2D: Draw text using Direct2D and DirectWrite.
-- L5.Lighting: Ambient, Diffuse and Specular shading on Cube. -- This is broken.
+- L5.Lighting: Ambient, Diffuse and Specular shading on Cube. <-- *This is broken*.
 - L6.First_Person_Camera: First Person Camera and movement with keyboard and mouse.
 - L7.Instancing: Draw hundreds of Cubes.
+- L8.SkyBox/Dome: Sky centered on Camera.
