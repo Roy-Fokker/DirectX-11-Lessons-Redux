@@ -35,3 +35,4 @@ Library dependencies are installed via [vcpkg](https://github.com/microsoft/vcpk
 - L6.First_Person_Camera: First Person Camera and movement with keyboard and mouse.
 - L7.Instancing: Draw hundreds of Cubes.
 - L8.SkyBox/Dome: Sky centered on Camera.
+- L9.Loading Screen: Simple loading screen while waiting for textures/files to be read.
