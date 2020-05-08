@@ -26,6 +26,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "L7.Cube_Instances", "L7.Cub
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "L8.Sky_Dome", "L8.Sky_Dome\L8.Sky_Dome.vcxproj", "{EA0EEC37-5AE1-47DD-9EB7-C1C85D735ECA}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "L9.Loading_Screen", "L9.Loading_Screen\L9.Loading_Screen.vcxproj", "{E88D66A8-F984-414F-B43B-7BF73919BF8A}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		common\common.vcxitems*{0881d2ea-6484-4c00-a159-3a2253e16c94}*SharedItemsImports = 4
@@ -35,6 +37,7 @@ Global
 		common\common.vcxitems*{8ed8d1b4-8efc-4170-8a08-8fedec489a42}*SharedItemsImports = 4
 		common\common.vcxitems*{aefb7dce-94de-480b-b38e-e5970d76666b}*SharedItemsImports = 4
 		common\common.vcxitems*{e5dcdd02-f9f7-4aa5-8368-49c7f7f44fe4}*SharedItemsImports = 4
+		common\common.vcxitems*{e88d66a8-f984-414f-b43b-7bf73919bf8a}*SharedItemsImports = 4
 		common\common.vcxitems*{e91ac52d-601b-405c-b8d9-76d648af331c}*SharedItemsImports = 4
 		common\common.vcxitems*{ea0eec37-5ae1-47dd-9eb7-c1c85d735eca}*SharedItemsImports = 4
 	EndGlobalSection
@@ -75,6 +78,10 @@ Global
 		{EA0EEC37-5AE1-47DD-9EB7-C1C85D735ECA}.Debug|x64.Build.0 = Debug|x64
 		{EA0EEC37-5AE1-47DD-9EB7-C1C85D735ECA}.Release|x64.ActiveCfg = Release|x64
 		{EA0EEC37-5AE1-47DD-9EB7-C1C85D735ECA}.Release|x64.Build.0 = Release|x64
+		{E88D66A8-F984-414F-B43B-7BF73919BF8A}.Debug|x64.ActiveCfg = Debug|x64
+		{E88D66A8-F984-414F-B43B-7BF73919BF8A}.Debug|x64.Build.0 = Debug|x64
+		{E88D66A8-F984-414F-B43B-7BF73919BF8A}.Release|x64.ActiveCfg = Release|x64
+		{E88D66A8-F984-414F-B43B-7BF73919BF8A}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
