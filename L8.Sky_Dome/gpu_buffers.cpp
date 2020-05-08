@@ -1,5 +1,6 @@
 #include "gpu_buffers.h"
 
+#include <DirectXTex.h>
 #include <DirectXTK\DDSTextureLoader.h>
 #include <array>
 #include <cassert>
@@ -185,7 +186,7 @@ void constant_buffer::create_set_function()
 
 #pragma region Shader Resource
 shader_resource::shader_resource(device_t device, shader_stage stage_, shader_slot slot_, const std::vector<uint8_t> &data) :
-	stage{ stage_ }, slot{ slot_ }
+	stage{ stage_ }, slot{ slot_ }, resource{ }
 {
 	auto hr = DirectX::CreateDDSTextureFromMemory(device,
 	                                              data.data(),
@@ -196,10 +197,61 @@ shader_resource::shader_resource(device_t device, shader_stage stage_, shader_sl
 	create_set_function();
 }
 
-shader_resource::shader_resource(direct3d11::device_t device, shader_stage stage_, shader_slot slot_, const CComPtr<ID3D11Texture2D> texture) :
-	resource{ texture }, stage{ stage_ }, slot{ slot_ }
+shader_resource::shader_resource(direct3d11::device_t device, shader_stage stage_, shader_slot slot_, const texture_t texture) :
+	stage{ stage_ }, slot{ slot_ }, resource{ texture }
 {
 	auto hr = device->CreateShaderResourceView(resource, nullptr, &resource_view);
+	assert(SUCCEEDED(hr));
+
+	create_set_function();
+}
+
+shader_resource::shader_resource(direct3d11::device_t device, shader_stage stage_, shader_slot slot_, 
+                                 const std::vector<std::vector<uint8_t>> &data) :
+	stage{ stage_ }, slot{ slot_ }
+{
+	auto texture_images = std::vector<DirectX::ScratchImage>{};
+	for (auto &tex_data : data)
+	{
+		auto info = DirectX::TexMetadata{};
+		auto &image = texture_images.emplace_back(DirectX::ScratchImage{});
+		DirectX::LoadFromDDSMemory(tex_data.data(), tex_data.size(), DirectX::DDS_FLAGS_NONE, &info, image);
+	}
+
+	auto srds = std::vector<D3D11_SUBRESOURCE_DATA>{};
+	for (auto &image : texture_images)
+	{
+		auto &srd = srds.emplace_back(D3D11_SUBRESOURCE_DATA{});
+		srd.pSysMem = image.GetPixels();
+		srd.SysMemPitch = static_cast<uint32_t>(image.GetImages()->rowPitch);
+		srd.SysMemSlicePitch = 0;
+	}
+
+	auto metadata = texture_images.front().GetMetadata();
+	auto td = D3D11_TEXTURE2D_DESC{};
+	td.Width = static_cast<uint32_t>(metadata.width);
+	td.Height = static_cast<uint32_t>(metadata.height);
+	td.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	td.Usage = D3D11_USAGE_DEFAULT;
+	td.Format = metadata.format;
+	td.SampleDesc = { 1, 0 };
+	td.ArraySize = static_cast<uint32_t>(texture_images.size());
+	td.MipLevels = 1;
+	td.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
+
+	auto tex_array = texture_t{};
+	auto hr = device->CreateTexture2D(&td, &srds[0], &tex_array);
+	assert(SUCCEEDED(hr));
+
+	resource = tex_array;
+
+	auto srvd = D3D11_SHADER_RESOURCE_VIEW_DESC{};
+	srvd.Format = td.Format;
+	srvd.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
+	srvd.TextureCube.MipLevels = td.MipLevels;
+	srvd.TextureCube.MostDetailedMip = 0;
+
+	hr = device->CreateShaderResourceView(resource, &srvd, &resource_view);
 	assert(SUCCEEDED(hr));
 
 	create_set_function();

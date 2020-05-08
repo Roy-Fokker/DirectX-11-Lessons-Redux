@@ -90,11 +90,15 @@ namespace dx11_lessons
 	class shader_resource
 	{
 	public:
+		using texture_t = CComPtr<ID3D11Texture2D>;
+
 		shader_resource() = delete;
 		shader_resource(direct3d11::device_t device, shader_stage stage, shader_slot slot, 
 		                const std::vector<uint8_t> &data);
 		shader_resource(direct3d11::device_t device, shader_stage stage, shader_slot slot,
-		                const CComPtr<ID3D11Texture2D> texture);
+		                const texture_t texture);
+		shader_resource(direct3d11::device_t device, shader_stage stage, shader_slot slot,
+		                const std::vector<std::vector<uint8_t>> &data);
 		~shader_resource();
 
 		void activate(direct3d11::context_t context);
@@ -105,7 +109,8 @@ namespace dx11_lessons
 		void create_set_function();
 
 	private:
-		CComPtr<ID3D11Resource> resource;
+		using resource_t = CComPtr<ID3D11Resource>;
+		resource_t resource;
 		CComPtr<ID3D11ShaderResourceView> resource_view;
 		shader_stage stage;
 		shader_slot slot;
