@@ -168,6 +168,9 @@ namespace
 			result_mesh = sub_divide_mesh(msh);
 		}
 
+		result_mesh.vertices.shrink_to_fit();
+		result_mesh.indicies.shrink_to_fit();
+
 		for (auto &v : result_mesh.vertices)
 		{
 			auto n = XMLoadFloat3(&v.normal);
@@ -178,6 +181,8 @@ namespace
 			p = XMVector3Normalize(p);
 			XMStoreFloat3(&v.position, p);
 		}
+
+
 
 		return result_mesh;
 	}
@@ -446,7 +451,7 @@ void loading_screen::make_text_mesh()
 void loading_screen::make_sky_dome_mesh()
 {
 	auto device = d3d->get_device();
-	auto dome = spherify_and_invert(cube_base, 4);
+	auto dome = spherify_and_invert(cube_base, 2);
 	sky_dome_mb = std::make_unique<mesh_buffer>(device, dome);
 }
 

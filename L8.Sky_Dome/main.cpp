@@ -26,12 +26,12 @@ auto main() -> int
 	auto wnd = window(L"DirectX 11 Lesson: Sky Dome",
 	                  { wnd_width, wnd_height });
 
-	auto ci = sky_dome(wnd.handle());
+	auto sd = sky_dome(wnd.handle());
 
 	wnd.set_message_callback(window::message_type::resize,
 	                         [&](uintptr_t wParam, uintptr_t lParam) -> bool
 	{
-		return ci.on_resize(wParam, lParam);
+		return sd.on_resize(wParam, lParam);
 	});
 
 	auto clk = game_clock();
@@ -40,14 +40,14 @@ auto main() -> int
 	wnd.show();
 	clk.reset();
 
-	while (wnd.handle() and not ci.exit())
+	while (wnd.handle() and not sd.exit())
 	{
 		clk.tick();
 		input.process_messages();
 		wnd.process_messages();
 
-		ci.update(clk, input);
-		ci.render();
+		sd.update(clk, input);
+		sd.render();
 	}
 
 	return 0;

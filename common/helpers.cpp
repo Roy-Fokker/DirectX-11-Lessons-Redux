@@ -34,5 +34,7 @@ auto dx11_lessons::load_binary_file(const std::filesystem::path &path) -> std::v
 	          std::istream_iterator<uint8_t>(),
 	          std::back_inserter(buffer));
 
+	buffer.shrink_to_fit();
+
 	return buffer;
 }

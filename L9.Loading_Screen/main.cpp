@@ -26,12 +26,12 @@ auto main() -> int
 	auto wnd = window(L"DirectX 11 Lesson: Loading Screen",
 	                  { wnd_width, wnd_height });
 
-	auto ci = loading_screen(wnd.handle());
+	auto ls = loading_screen(wnd.handle());
 
 	wnd.set_message_callback(window::message_type::resize,
 	                         [&](uintptr_t wParam, uintptr_t lParam) -> bool
 	{
-		return ci.on_resize(wParam, lParam);
+		return ls.on_resize(wParam, lParam);
 	});
 
 	auto clk = game_clock();
@@ -40,14 +40,14 @@ auto main() -> int
 	wnd.show();
 	clk.reset();
 
-	while (wnd.handle() and not ci.exit())
+	while (wnd.handle() and not ls.exit())
 	{
 		clk.tick();
 		input.process_messages();
 		wnd.process_messages();
 
-		ci.update(clk, input);
-		ci.render();
+		ls.update(clk, input);
+		ls.render();
 	}
 
 	return 0;
