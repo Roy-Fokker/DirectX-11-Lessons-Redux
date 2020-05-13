@@ -17,6 +17,8 @@
 #include <DirectXMath.h>
 #include <array>
 #include <cmath>
+#include <thread>
+#include <future>
 
 using namespace dx11_lessons;
 using namespace DirectX;
@@ -257,28 +259,54 @@ auto loading_screen::exit() const -> bool
 
 void loading_screen::update(const game_clock &clk, const raw_input &input)
 {
-	input_update(clk, input);
-	cube_update(clk);
-	camera_update();
-	cube_instance_update(clk);
-	text_update(clk);
+	auto all_good = true;
+	for (auto &f : object_futures)
+	{
+		all_good = all_good 
+		       and (f.wait_for(std::chrono::seconds(0)) == std::future_status::ready);
+	}
+	if (all_good
+		and
+		not object_futures.empty())
+	{
+		object_futures.clear();
+	}
+
+	if (all_good)
+	{
+		input_update(clk, input);
+		cube_update(clk);
+		camera_update();
+		cube_instance_update(clk);
+		text_update(clk);
+	}
+	else
+	{
+		update_load_status();
+	}
 }
 
 void loading_screen::render()
 {
 	auto context = d3d->get_context();
-
 	rp->activate(context);
 	rp->clear(context, clear_color);
 
-	constant_buffers[cb_prespective]->activate(context);
-	constant_buffers[cb_camera]->activate(context);
-	draw_cube();
-	draw_cube_instances();
-	draw_sky();
+	if (not object_futures.empty())
+	{
+		draw_load_status();
+	}
+	else
+	{
+		constant_buffers[cb_prespective]->activate(context);
+		constant_buffers[cb_camera]->activate(context);
+		draw_cube();
+		draw_cube_instances();
+		draw_sky();
 
-	constant_buffers[cb_orthographic]->activate(context);
-	draw_text();
+		constant_buffers[cb_orthographic]->activate(context);
+		draw_text();
+	}
 
 	d3d->present(enable_vSync);
 }
@@ -287,11 +315,36 @@ void loading_screen::create_pipeline_state_object()
 {
 	pipeline_states.resize(5);
 
-	make_default_ps();
-	make_light_ps();
-	make_text_ps();
-	make_cube_instance_ps();
-	make_sky_dome_ps();
+	object_futures.emplace_back(
+		std::async(std::launch::async, [&]
+	{
+		make_text_ps();
+		return true;
+	}));
+	object_futures.emplace_back(
+		std::async(std::launch::async, [&]
+	{
+		make_default_ps();
+		return true;
+	}));
+	object_futures.emplace_back(
+		std::async(std::launch::async, [&]
+	{
+		make_light_ps();
+		return true;
+	}));
+	object_futures.emplace_back(
+		std::async(std::launch::async, [&]
+	{
+		make_cube_instance_ps();
+		return true;
+	}));
+	object_futures.emplace_back(
+		std::async(std::launch::async, [&]
+	{
+		make_sky_dome_ps();
+		return true;
+	}));
 }
 
 void loading_screen::make_default_ps()
@@ -400,10 +453,30 @@ void loading_screen::create_mesh_buffers()
 {
 	mesh_buffers.resize(4);
 
-	make_cube_mesh();
-	make_text_mesh();
-	make_cube_instance_mesh();
-	make_sky_dome_mesh();
+	object_futures.emplace_back(
+		std::async(std::launch::async, [&]
+	{
+		make_text_mesh();
+		return true;
+	}));
+	object_futures.emplace_back(
+		std::async(std::launch::async, [&]
+	{
+		make_cube_mesh();
+		return true;
+	}));
+	object_futures.emplace_back(
+		std::async(std::launch::async, [&]
+	{
+		make_cube_instance_mesh();
+		return true;
+	}));
+	object_futures.emplace_back(
+		std::async(std::launch::async, [&]
+	{
+		make_sky_dome_mesh();
+		return true;
+	}));
 }
 
 void loading_screen::make_cube_mesh()
@@ -480,21 +553,42 @@ void loading_screen::create_contant_buffers()
 {
 	constant_buffers.resize(6);
 
-	// Projection
-	make_prespective_cb();
-	make_orthographic_cb();
-	
-	// View
-	make_view_cb();
-	
-	// Cube Transform
-	make_cube_transform_cb();
-
-	// Text Transform
-	make_text_transform_cb();
-
-	// Light
-	make_light_data_cb();
+	object_futures.emplace_back(
+		std::async(std::launch::async, [&]
+	{
+		make_orthographic_cb();
+		return true;
+	}));
+	object_futures.emplace_back(
+		std::async(std::launch::async, [&]
+	{
+		make_text_transform_cb();
+		return true;
+	}));
+	object_futures.emplace_back(
+		std::async(std::launch::async, [&]
+	{
+		make_prespective_cb();
+		return true;
+	}));
+	object_futures.emplace_back(
+		std::async(std::launch::async, [&]
+	{
+		make_view_cb();
+		return true;
+	}));
+	object_futures.emplace_back(
+		std::async(std::launch::async, [&]
+	{
+		make_cube_transform_cb();
+		return true;
+	}));
+	object_futures.emplace_back(
+		std::async(std::launch::async, [&]
+	{
+		make_light_data_cb();
+		return true;
+	}));
 }
 
 void loading_screen::make_prespective_cb()
@@ -572,9 +666,24 @@ void loading_screen::create_shader_resources()
 {
 	shader_resources.resize(3);
 
-	make_cube_texture();
-	make_text_texture();
-	make_sky_dome_texture();
+	object_futures.emplace_back(
+		std::async(std::launch::async, [&]
+	{
+		make_text_texture();
+		return true;
+	}));
+	object_futures.emplace_back(
+		std::async(std::launch::async, [&]
+	{
+		make_cube_texture();
+		return true;
+	}));
+	object_futures.emplace_back(
+		std::async(std::launch::async, [&]
+	{
+		make_sky_dome_texture();
+		return true;
+	}));
 }
 
 void loading_screen::make_cube_texture()
@@ -783,4 +892,64 @@ void loading_screen::draw_sky()
 	mesh_buffers[mb_sky]->activate(context);
 
 	mesh_buffers[mb_sky]->draw(context);
+}
+
+void dx11_lessons::loading_screen::update_load_status()
+{
+	if (not (pipeline_states[ps_text]
+		and shader_resources[sr_text]
+		and constant_buffers[cb_text]
+		and mesh_buffers[mb_text]))
+	{
+		return;
+	}
+
+	auto loaded_items = std::count_if(pipeline_states.begin(), pipeline_states.end(),
+								  [](const std::unique_ptr<pipeline_state> &ptr)
+	{
+		return ptr != nullptr;
+	});
+	loaded_items += std::count_if(constant_buffers.begin(), constant_buffers.end(),
+								  [](const std::unique_ptr<constant_buffer> &ptr)
+	{
+		return ptr != nullptr;
+	});
+	loaded_items += std::count_if(mesh_buffers.begin(), mesh_buffers.end(),
+								  [](const std::unique_ptr<mesh_buffer> &ptr)
+	{
+		return ptr != nullptr;
+	});
+	loaded_items += std::count_if(shader_resources.begin(), shader_resources.end(),
+								  [](const std::unique_ptr<shader_resource> &ptr)
+	{
+		return ptr != nullptr;
+	});
+
+	auto text = fmt::format(L"Loaded: {} of {}", loaded_items, object_futures.size());
+	auto [width, height] = get_window_size(hWnd);
+	auto format = d2d->make_text_format(L"Consolas", 20.0f);
+	auto brush = d2d->make_solid_color_brush(D2D1::ColorF(D2D1::ColorF::Yellow));
+
+	d2d->begin_draw(shader_resources[sr_text]->get_dxgi_surface(), d2d_clear_color);
+	d2d->draw_text(text,
+				   { 10, 10 },
+				   { static_cast<float>(width), static_cast<float>(height) },
+				   format, brush);
+	d2d->end();
+}
+
+void dx11_lessons::loading_screen::draw_load_status()
+{
+	if (not (pipeline_states[ps_text]
+		and shader_resources[sr_text]
+		and constant_buffers[cb_text]
+		and mesh_buffers[mb_text]
+		and constant_buffers[cb_orthographic]))
+	{
+		return;
+	}
+
+	auto context = d3d->get_context();
+	constant_buffers[cb_orthographic]->activate(context);
+	draw_text();
 }

@@ -3,6 +3,7 @@
 #include <Windows.h>
 #include <memory>
 #include <vector>
+#include <future>
 
 namespace dx11_lessons
 {
@@ -68,6 +69,9 @@ namespace dx11_lessons
 		void draw_text();
 		void draw_sky();
 
+		void update_load_status();
+		void draw_load_status();
+
 	private:
 		HWND hWnd;
 		bool stop_drawing{ false };
@@ -84,5 +88,7 @@ namespace dx11_lessons
 		std::unique_ptr<camera> fp_cam{};
 		
 		float cube_angle{};
+
+		std::vector<std::future<bool>> object_futures;
 	};
 }
