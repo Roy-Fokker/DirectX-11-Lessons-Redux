@@ -315,12 +315,8 @@ void loading_screen::create_pipeline_state_object()
 {
 	pipeline_states.resize(5);
 
-	object_futures.emplace_back(
-		std::async(std::launch::async, [&]
-	{
-		make_text_ps();
-		return true;
-	}));
+	make_text_ps();
+
 	object_futures.emplace_back(
 		std::async(std::launch::async, [&]
 	{
@@ -453,12 +449,8 @@ void loading_screen::create_mesh_buffers()
 {
 	mesh_buffers.resize(4);
 
-	object_futures.emplace_back(
-		std::async(std::launch::async, [&]
-	{
-		make_text_mesh();
-		return true;
-	}));
+	make_text_mesh();
+
 	object_futures.emplace_back(
 		std::async(std::launch::async, [&]
 	{
@@ -553,18 +545,9 @@ void loading_screen::create_contant_buffers()
 {
 	constant_buffers.resize(6);
 
-	object_futures.emplace_back(
-		std::async(std::launch::async, [&]
-	{
-		make_orthographic_cb();
-		return true;
-	}));
-	object_futures.emplace_back(
-		std::async(std::launch::async, [&]
-	{
-		make_text_transform_cb();
-		return true;
-	}));
+	make_orthographic_cb();
+	make_text_transform_cb();
+
 	object_futures.emplace_back(
 		std::async(std::launch::async, [&]
 	{
@@ -666,12 +649,8 @@ void loading_screen::create_shader_resources()
 {
 	shader_resources.resize(3);
 
-	object_futures.emplace_back(
-		std::async(std::launch::async, [&]
-	{
-		make_text_texture();
-		return true;
-	}));
+	make_text_texture();
+
 	object_futures.emplace_back(
 		std::async(std::launch::async, [&]
 	{
@@ -896,14 +875,6 @@ void loading_screen::draw_sky()
 
 void dx11_lessons::loading_screen::update_load_status()
 {
-	if (not (pipeline_states[ps_text]
-		and shader_resources[sr_text]
-		and constant_buffers[cb_text]
-		and mesh_buffers[mb_text]))
-	{
-		return;
-	}
-
 	auto loaded_items = std::count_if(pipeline_states.begin(), pipeline_states.end(),
 								  [](const std::unique_ptr<pipeline_state> &ptr)
 	{
@@ -924,6 +895,7 @@ void dx11_lessons::loading_screen::update_load_status()
 	{
 		return ptr != nullptr;
 	});
+	loaded_items -= 5;
 
 	auto text = fmt::format(L"Loaded: {} of {}", loaded_items, object_futures.size());
 	auto [width, height] = get_window_size(hWnd);
@@ -940,15 +912,6 @@ void dx11_lessons::loading_screen::update_load_status()
 
 void dx11_lessons::loading_screen::draw_load_status()
 {
-	if (not (pipeline_states[ps_text]
-		and shader_resources[sr_text]
-		and constant_buffers[cb_text]
-		and mesh_buffers[mb_text]
-		and constant_buffers[cb_orthographic]))
-	{
-		return;
-	}
-
 	auto context = d3d->get_context();
 	constant_buffers[cb_orthographic]->activate(context);
 	draw_text();
