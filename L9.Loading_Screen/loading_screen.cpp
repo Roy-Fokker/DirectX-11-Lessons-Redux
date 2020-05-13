@@ -16,7 +16,6 @@
 #include <fmt/core.h>
 #include <DirectXMath.h>
 #include <array>
-#include <vector>
 #include <cmath>
 
 using namespace dx11_lessons;
@@ -186,6 +185,40 @@ namespace
 
 		return result_mesh;
 	}
+
+	enum ps_ids
+	{
+		ps_default,
+		ps_text,
+		ps_light,
+		ps_instancing,
+		ps_sky,
+	};
+
+	enum mb_ids
+	{
+		mb_cube,
+		mb_cubes,
+		mb_text,
+		mb_sky,
+	};
+
+	enum cb_ids
+	{
+		cb_prespective,
+		cb_orthographic,
+		cb_camera,
+		cb_text,
+		cb_cube,
+		cb_light,
+	};
+
+	enum sr_ids
+	{
+		sr_text,
+		sr_cube,
+		sr_sky,
+	};
 }
 
 loading_screen::loading_screen(HWND hwnd) :
@@ -238,37 +271,22 @@ void loading_screen::render()
 	rp->activate(context);
 	rp->clear(context, clear_color);
 
-	prespective_proj_cb->activate(context);
-	view_cb->activate(context);
+	constant_buffers[cb_prespective]->activate(context);
+	constant_buffers[cb_camera]->activate(context);
+	draw_cube();
+	draw_cube_instances();
+	draw_sky();
 
-	light_ps->activate(context);
-	light_cb->activate(context);
-	cube_cb->activate(context);
-	cube_sr->activate(context);
-	cube_mb->activate(context);
-	cube_mb->draw(context);
-
-	cube_instance_ps->activate(context);
-	cube_instance_mb->activate(context);
-	cube_instance_mb->draw(context);
-
-	sky_dome_ps->activate(context);
-	sky_dome_sr->activate(context);
-	sky_dome_mb->activate(context);
-	sky_dome_mb->draw(context);
-
-	orthographic_proj_cb->activate(context);
-	screen_text_ps->activate(context);
-	text_cb->activate(context);
-	text_sr->activate(context);
-	text_mb->activate(context);
-	text_mb->draw(context);
+	constant_buffers[cb_orthographic]->activate(context);
+	draw_text();
 
 	d3d->present(enable_vSync);
 }
 
 void loading_screen::create_pipeline_state_object()
 {
+	pipeline_states.resize(5);
+
 	make_default_ps();
 	make_light_ps();
 	make_text_ps();
@@ -280,7 +298,7 @@ void loading_screen::make_default_ps()
 {
 	auto device = d3d->get_device();
 	auto vso = load_binary_file(L"vertex_shader.cso"),
-	     basic_pso = load_binary_file(L"pixel_shader.cso");
+	     pso = load_binary_file(L"pixel_shader.cso");
 
 	auto desc = pipeline_state::description
 	{
@@ -290,17 +308,17 @@ void loading_screen::make_default_ps()
 		ss::anisotropic_clamp,
 		vertex_elements,
 		vso,
-		basic_pso,
+		pso,
 		D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST
 	};
-	ps = std::make_unique<pipeline_state>(device, desc);
+	pipeline_states[ps_default] = std::make_unique<pipeline_state>(device, desc);
 }
 
 void loading_screen::make_light_ps()
 {
 	auto device = d3d->get_device();
 	auto vso = load_binary_file(L"vertex_shader.cso"),
-	     light_pso = load_binary_file(L"lighting.ps.cso");
+	     pso = load_binary_file(L"lighting.ps.cso");
 
 	auto light_desc = pipeline_state::description
 	{
@@ -310,18 +328,18 @@ void loading_screen::make_light_ps()
 		ss::anisotropic_clamp,
 		vertex_elements,
 		vso,
-		light_pso,
+		pso,
 		D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST
 	};
 
-	light_ps = std::make_unique<pipeline_state>(device, light_desc);
+	pipeline_states[ps_light] = std::make_unique<pipeline_state>(device, light_desc);
 }
 
 void loading_screen::make_text_ps()
 {
 	auto device = d3d->get_device();
-	auto screen_text_vso = load_binary_file(L"screen_space_text.vs.cso"),
-	     basic_pso = load_binary_file(L"pixel_shader.cso");
+	auto vso = load_binary_file(L"screen_space_text.vs.cso"),
+	     pso = load_binary_file(L"pixel_shader.cso");
 
 	auto screen_text_desc = pipeline_state::description
 	{
@@ -330,18 +348,18 @@ void loading_screen::make_text_ps()
 		rs::cull_anti_clockwise,
 		ss::anisotropic_clamp,
 		vertex_elements,
-		screen_text_vso,
-		basic_pso,
+		vso,
+		pso,
 		D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST
 	};
-	screen_text_ps = std::make_unique<pipeline_state>(device, screen_text_desc);
+	pipeline_states[ps_text]= std::make_unique<pipeline_state>(device, screen_text_desc);
 }
 
 void loading_screen::make_cube_instance_ps()
 {
 	auto device = d3d->get_device();
 	auto vso = load_binary_file(L"cube_instances.vs.cso"),
-	     basic_pso = load_binary_file(L"pixel_shader.cso");
+	     pso = load_binary_file(L"pixel_shader.cso");
 
 	auto desc = pipeline_state::description
 	{
@@ -351,17 +369,17 @@ void loading_screen::make_cube_instance_ps()
 		ss::anisotropic_clamp,
 		instanced_vertex_elements,
 		vso,
-		basic_pso,
+		pso,
 		D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST
 	};
-	cube_instance_ps = std::make_unique<pipeline_state>(device, desc);
+	pipeline_states[ps_instancing] = std::make_unique<pipeline_state>(device, desc);
 }
 
 void loading_screen::make_sky_dome_ps()
 {
 	auto device = d3d->get_device();
 	auto vso = load_binary_file(L"sky_dome.vs.cso"),
-		pso = load_binary_file(L"sky_dome.ps.cso");
+	     pso = load_binary_file(L"sky_dome.ps.cso");
 
 	auto sky_dome_desc = pipeline_state::description
 	{
@@ -370,15 +388,18 @@ void loading_screen::make_sky_dome_ps()
 		rs::cull_clockwise,
 		ss::anisotropic_clamp,
 		vertex_elements,
-		vso, pso,
+		vso,
+		pso,
 		D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST
 	};
 
-	sky_dome_ps = std::make_unique<pipeline_state>(device, sky_dome_desc);
+	pipeline_states[ps_sky] = std::make_unique<pipeline_state>(device, sky_dome_desc);
 }
 
 void loading_screen::create_mesh_buffers()
 {
+	mesh_buffers.resize(4);
+
 	make_cube_mesh();
 	make_text_mesh();
 	make_cube_instance_mesh();
@@ -389,7 +410,7 @@ void loading_screen::make_cube_mesh()
 {
 	auto device = d3d->get_device();
 	auto cube_mesh = spherify_and_invert(cube_base, 2);
-	cube_mb = std::make_unique<mesh_buffer>(device, cube_mesh);
+	mesh_buffers[mb_cube] = std::make_unique<mesh_buffer>(device, cube_mesh);
 }
 
 void loading_screen::make_cube_instance_mesh()
@@ -420,7 +441,7 @@ void loading_screen::make_cube_instance_mesh()
 		transform.data = XMMatrixTranspose(transform.data);
 	}
 
-	cube_instance_mb = std::make_unique<mesh_buffer>(device, cube_mesh);
+	mesh_buffers[mb_cubes] = std::make_unique<mesh_buffer>(device, cube_mesh);
 }
 
 void loading_screen::make_text_mesh()
@@ -445,18 +466,20 @@ void loading_screen::make_text_mesh()
 		}
 	};
 
-	text_mb = std::make_unique<mesh_buffer>(device, rect_mesh);
+	mesh_buffers[mb_text] = std::make_unique<mesh_buffer>(device, rect_mesh);
 }
 
 void loading_screen::make_sky_dome_mesh()
 {
 	auto device = d3d->get_device();
 	auto dome = spherify_and_invert(cube_base, 2);
-	sky_dome_mb = std::make_unique<mesh_buffer>(device, dome);
+	mesh_buffers[mb_sky] = std::make_unique<mesh_buffer>(device, dome);
 }
 
 void loading_screen::create_contant_buffers()
 {
+	constant_buffers.resize(6);
+
 	// Projection
 	make_prespective_cb();
 	make_orthographic_cb();
@@ -486,7 +509,7 @@ void loading_screen::make_prespective_cb()
 	auto projection = matrix{};
 	projection.data = XMMatrixPerspectiveFovLH(v_fov, aspect_ratio, near_z, far_z);
 	projection.data = XMMatrixTranspose(projection.data);
-	prespective_proj_cb = std::make_unique<constant_buffer>(device, stage::vertex, slot::projection, projection);
+	constant_buffers[cb_prespective] = std::make_unique<constant_buffer>(device, stage::vertex, slot::projection, projection);
 }
 
 void loading_screen::make_orthographic_cb()
@@ -497,7 +520,7 @@ void loading_screen::make_orthographic_cb()
 	auto projection = matrix{};
 	projection.data = XMMatrixOrthographicLH(width, height, -1.0f, 1.0f);
 	projection.data = XMMatrixTranspose(projection.data);
-	orthographic_proj_cb = std::make_unique<constant_buffer>(device, stage::vertex, slot::projection, projection);
+	constant_buffers[cb_orthographic] = std::make_unique<constant_buffer>(device, stage::vertex, slot::projection, projection);
 }
 
 void loading_screen::make_view_cb()
@@ -510,7 +533,7 @@ void loading_screen::make_view_cb()
 	auto view = view_matrix{};
 	view.matrix = XMMatrixTranspose(fp_cam->get_view());
 	view.position = fp_cam->get_position();
-	view_cb = std::make_unique<constant_buffer>(device, stage::vertex, slot::view, view);
+	constant_buffers[cb_camera] = std::make_unique<constant_buffer>(device, stage::vertex, slot::view, view);
 }
 
 void loading_screen::make_cube_transform_cb()
@@ -519,7 +542,7 @@ void loading_screen::make_cube_transform_cb()
 
 	auto cube_pos = matrix{ XMMatrixTranslation(0.0f, 1.0f, 0.0f) };
 	cube_pos.data = XMMatrixTranspose(cube_pos.data);
-	cube_cb = std::make_unique<constant_buffer>(device, stage::vertex, slot::transform, cube_pos);
+	constant_buffers[cb_cube] = std::make_unique<constant_buffer>(device, stage::vertex, slot::transform, cube_pos);
 
 }
 
@@ -529,7 +552,7 @@ void loading_screen::make_text_transform_cb()
 
 	auto text_pos = matrix{ XMMatrixTranslation(0.0f, 0.0f, 0.0f) };
 	text_pos.data = XMMatrixTranspose(text_pos.data);
-	text_cb = std::make_unique<constant_buffer>(device, stage::vertex, slot::transform, text_pos);
+	constant_buffers[cb_text] = std::make_unique<constant_buffer>(device, stage::vertex, slot::transform, text_pos);
 }
 
 void loading_screen::make_light_data_cb()
@@ -542,11 +565,13 @@ void loading_screen::make_light_data_cb()
 	light_data.light_pos = { 0.0f, 3.0f, 5.0f };
 	light_data.specular_power = 32.0f;
 	light_data.specular = { 1.0f, 0.0f, 0.0f, 1.0f };
-	light_cb = std::make_unique<constant_buffer>(device, stage::pixel, slot::light, light_data);
+	constant_buffers[cb_light] = std::make_unique<constant_buffer>(device, stage::pixel, slot::light, light_data);
 }
 
 void loading_screen::create_shader_resources()
 {
+	shader_resources.resize(3);
+
 	make_cube_texture();
 	make_text_texture();
 	make_sky_dome_texture();
@@ -557,7 +582,7 @@ void loading_screen::make_cube_texture()
 	auto device = d3d->get_device();
 
 	auto tex = load_binary_file(L"uv_grid.dds");
-	cube_sr = std::make_unique<shader_resource>(device,
+	shader_resources[sr_cube] = std::make_unique<shader_resource>(device,
 	                                            shader_stage::pixel, shader_slot::texture,
 	                                            tex);
 }
@@ -581,7 +606,7 @@ void loading_screen::make_text_texture()
 	auto hr = device->CreateTexture2D(&td, nullptr, &text_tex);
 	assert(SUCCEEDED(hr));
 
-	text_sr = std::make_unique<shader_resource>(device,
+	shader_resources[sr_text] = std::make_unique<shader_resource>(device,
 	                                            shader_stage::pixel, shader_slot::texture,
 	                                            text_tex);
 }
@@ -598,7 +623,7 @@ void loading_screen::make_sky_dome_texture()
 	textures.emplace_back(load_binary_file(L"back.dds"));
 	textures.emplace_back(load_binary_file(L"front.dds"));
 	
-	sky_dome_sr = std::make_unique<shader_resource>(device, 
+	shader_resources[sr_sky] = std::make_unique<shader_resource>(device,
 	                                                shader_stage::pixel, shader_slot::texture,
 	                                                textures);
 }
@@ -646,7 +671,7 @@ void loading_screen::cube_update(const game_clock &clk)
 	cube_pos.data *= XMMatrixTranslation(0.0f, 1.0f, 0.0f);
 	cube_pos.data = XMMatrixTranspose(cube_pos.data);
 
-	cube_cb->update(context, cube_pos);
+	constant_buffers[cb_cube]->update(context, cube_pos);
 }
 
 void loading_screen::camera_update()
@@ -659,7 +684,7 @@ void loading_screen::camera_update()
 		fp_cam->get_position()
 	};
 
-	view_cb->update(context, view);
+	constant_buffers[cb_camera]->update(context, view);
 }
 
 void loading_screen::text_update(const game_clock &clk)
@@ -685,7 +710,7 @@ void loading_screen::text_update(const game_clock &clk)
 	auto format = d2d->make_text_format(L"Consolas", 12.0f);
 	auto brush = d2d->make_solid_color_brush(D2D1::ColorF(D2D1::ColorF::Yellow));
 
-	d2d->begin_draw(text_sr->get_dxgi_surface(), d2d_clear_color);
+	d2d->begin_draw(shader_resources[sr_text]->get_dxgi_surface(), d2d_clear_color);
 	d2d->draw_text(fps_text,
 	               { 10, 10 },
 	               { static_cast<float>(width), static_cast<float>(height) },
@@ -710,5 +735,52 @@ void loading_screen::cube_instance_update(const game_clock &clk)
 		transform.data = XMMatrixTranspose(transform.data);
 	}
 
-	cube_instance_mb->update_instances(d3d->get_context(), transforms);
+	mesh_buffers[mb_cubes]->update_instances(d3d->get_context(), transforms);
+}
+
+void loading_screen::draw_cube()
+{
+	auto context = d3d->get_context();
+	
+	pipeline_states[ps_light]->activate(context);
+	constant_buffers[cb_light]->activate(context);
+	constant_buffers[cb_cube]->activate(context);
+	shader_resources[sr_cube]->activate(context);
+	mesh_buffers[mb_cube]->activate(context);
+
+	mesh_buffers[mb_cube]->draw(context);
+}
+
+void loading_screen::draw_cube_instances()
+{
+	auto context = d3d->get_context();
+
+	pipeline_states[ps_instancing]->activate(context);
+	shader_resources[sr_cube]->activate(context);
+	mesh_buffers[mb_cubes]->activate(context);
+
+	mesh_buffers[mb_cubes]->draw(context);
+}
+
+void loading_screen::draw_text()
+{
+	auto context = d3d->get_context();
+
+	pipeline_states[ps_text]->activate(context);
+	shader_resources[sr_text]->activate(context);
+	constant_buffers[cb_text]->activate(context);
+	mesh_buffers[mb_text]->activate(context);
+
+	mesh_buffers[mb_text]->draw(context);
+}
+
+void loading_screen::draw_sky()
+{
+	auto context = d3d->get_context();
+
+	pipeline_states[ps_sky]->activate(context);
+	shader_resources[sr_sky]->activate(context);
+	mesh_buffers[mb_sky]->activate(context);
+
+	mesh_buffers[mb_sky]->draw(context);
 }

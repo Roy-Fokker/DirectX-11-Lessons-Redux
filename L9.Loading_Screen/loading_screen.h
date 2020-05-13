@@ -2,6 +2,7 @@
 
 #include <Windows.h>
 #include <memory>
+#include <vector>
 
 namespace dx11_lessons
 {
@@ -62,6 +63,11 @@ namespace dx11_lessons
 		void text_update(const game_clock &clk);
 		void cube_instance_update(const game_clock &clk);
 
+		void draw_cube();
+		void draw_cube_instances();
+		void draw_text();
+		void draw_sky();
+
 	private:
 		HWND hWnd;
 		bool stop_drawing{ false };
@@ -70,30 +76,13 @@ namespace dx11_lessons
 		std::unique_ptr<direct2d1> d2d{};
 		std::unique_ptr<render_pass> rp{};
 
-		std::unique_ptr<pipeline_state> ps{};
-		std::unique_ptr<pipeline_state> light_ps{};
-		std::unique_ptr<pipeline_state> screen_text_ps{};
-		std::unique_ptr<pipeline_state> cube_instance_ps{};
-		std::unique_ptr<pipeline_state> sky_dome_ps{};
-
-		std::unique_ptr<mesh_buffer> cube_mb{};
-		std::unique_ptr<mesh_buffer> text_mb{};
-		std::unique_ptr<mesh_buffer> cube_instance_mb{};
-		std::unique_ptr<mesh_buffer> sky_dome_mb{};
-
-		std::unique_ptr<constant_buffer> prespective_proj_cb{};
-		std::unique_ptr<constant_buffer> orthographic_proj_cb{};
+		std::vector<std::unique_ptr<pipeline_state>> pipeline_states{};
+		std::vector<std::unique_ptr<mesh_buffer>> mesh_buffers{};
+		std::vector<std::unique_ptr<constant_buffer>> constant_buffers{};
+		std::vector<std::unique_ptr<shader_resource>> shader_resources{};
 
 		std::unique_ptr<camera> fp_cam{};
-		std::unique_ptr<constant_buffer> view_cb{};
-
+		
 		float cube_angle{};
-		std::unique_ptr<constant_buffer> cube_cb{};
-		std::unique_ptr<constant_buffer> light_cb{};
-		std::unique_ptr<constant_buffer> text_cb{};
-
-		std::unique_ptr<shader_resource> cube_sr{};
-		std::unique_ptr<shader_resource> text_sr{};
-		std::unique_ptr<shader_resource> sky_dome_sr{};
 	};
 }
