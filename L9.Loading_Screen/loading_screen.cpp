@@ -263,7 +263,7 @@ void loading_screen::update(const game_clock &clk, const raw_input &input)
 	for (auto &f : object_futures)
 	{
 		all_good = all_good 
-		       and (f.wait_for(std::chrono::seconds(0)) == std::future_status::ready);
+		       and (f._Is_ready());
 	}
 	if (all_good
 		and
@@ -667,9 +667,9 @@ void loading_screen::create_shader_resources()
 
 void loading_screen::make_cube_texture()
 {
-	auto device = d3d->get_device();
-
 	auto tex = load_binary_file(L"uv_grid.dds");
+
+	auto device = d3d->get_device();
 	shader_resources[sr_cube] = std::make_unique<shader_resource>(device,
 	                                            shader_stage::pixel, shader_slot::texture,
 	                                            tex);
@@ -701,16 +701,17 @@ void loading_screen::make_text_texture()
 
 void loading_screen::make_sky_dome_texture()
 {
-	auto device = d3d->get_device();
-
 	auto textures = std::vector<std::vector<uint8_t>>{};
+	
 	textures.emplace_back(load_binary_file(L"left.dds"));
 	textures.emplace_back(load_binary_file(L"right.dds"));
 	textures.emplace_back(load_binary_file(L"top.dds"));
 	textures.emplace_back(load_binary_file(L"bottom.dds"));
 	textures.emplace_back(load_binary_file(L"back.dds"));
 	textures.emplace_back(load_binary_file(L"front.dds"));
-	
+
+	auto device = d3d->get_device();
+
 	shader_resources[sr_sky] = std::make_unique<shader_resource>(device,
 	                                                shader_stage::pixel, shader_slot::texture,
 	                                                textures);
