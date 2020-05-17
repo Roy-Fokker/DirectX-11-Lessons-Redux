@@ -5,6 +5,8 @@ Since learning DX 12 is proving difficult.
 ## References
 - https://bell0bytes.eu/game-programming/
 - http://www.rastertek.com/tutdx11s2.html
+- https://github.com/KhronosGroup/glTF-Tutorials
+- 
 
 ## Tools
 - Visual Studio 2019 Community - Latest
@@ -36,3 +38,4 @@ Library dependencies are installed via [vcpkg](https://github.com/microsoft/vcpk
 - L7.Cube_Instances: Draw hundreds of Cubes.
 - L8.Sky_Dome: Sky centered on Camera.
 - L9.Loading_Screen: Simple loading screen while waiting for textures/files to be read.
+- L10.Model_Loading: Loading mesh/model data from file with associated textures, and display it.

@@ -32,6 +32,8 @@ namespace dx11_lessons
 		void render();
 
 	private:
+		void load_files();
+
 		void create_pipeline_state_object();
 		void make_default_ps();
 		void make_light_ps();
@@ -90,5 +92,6 @@ namespace dx11_lessons
 		float cube_angle{};
 
 		std::vector<std::future<bool>> object_futures;
+		std::vector<std::vector<uint8_t>> files_loaded;
 	};
 }

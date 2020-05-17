@@ -19,9 +19,12 @@
 #include <cmath>
 #include <thread>
 #include <future>
+#include <string_view>
+#include <functional>
 
 using namespace dx11_lessons;
 using namespace DirectX;
+using namespace std::string_view_literals;
 
 namespace
 {
@@ -221,6 +224,41 @@ namespace
 		sr_cube,
 		sr_sky,
 	};
+
+	auto list_of_files_to_load = std::array{
+		L"vertex_shader.cso"sv,
+		L"pixel_shader.cso"sv,
+		L"lighting.ps.cso"sv,
+		L"screen_space_text.vs.cso"sv,
+		L"cube_instances.vs.cso"sv,
+		L"sky_dome.vs.cso"sv,
+		L"sky_dome.ps.cso"sv,
+		L"uv_grid.dds"sv,
+		L"left.dds"sv,
+		L"right.dds"sv,
+		L"top.dds"sv,
+		L"bottom.dds"sv,
+		L"back.dds"sv,
+		L"front.dds"sv,
+	};
+
+	enum file_list
+	{
+		basic_vso, 
+		basic_pso, 
+		light_pso,
+		text_vso,
+		instance_vso,
+		sky_vso,
+		sky_pso,
+		uv_tex,
+		left_tex,
+		right_tex,
+		top_tex,
+		bottom_tex,
+		back_tex,
+		front_tex,
+	};
 }
 
 loading_screen::loading_screen(HWND hwnd) :
@@ -230,6 +268,7 @@ loading_screen::loading_screen(HWND hwnd) :
 	d2d = std::make_unique<direct2d1>(d3d->get_dxgi_device());
 	rp = std::make_unique<render_pass>(d3d->get_device(), d3d->get_swapchain());
 
+	load_files();
 	create_pipeline_state_object();
 	create_mesh_buffers();
 	create_contant_buffers();
@@ -270,6 +309,7 @@ void loading_screen::update(const game_clock &clk, const raw_input &input)
 		not object_futures.empty())
 	{
 		object_futures.clear();
+		files_loaded.clear();
 	}
 
 	if (all_good)
@@ -311,6 +351,23 @@ void loading_screen::render()
 	d3d->present(enable_vSync);
 }
 
+void loading_screen::load_files()
+{
+	files_loaded.resize(list_of_files_to_load.size());
+
+	auto load_file_async = [&](uint16_t idx, std::wstring_view file_name)
+	{
+		files_loaded[idx] = load_binary_file(file_name);
+		return true;
+	};
+
+	for (auto &&[i, filename] : list_of_files_to_load | iter::enumerate)
+	{
+		object_futures.emplace_back(
+			std::async(std::launch::async, load_file_async, static_cast<uint16_t>(i), filename));
+	}
+}
+
 void loading_screen::create_pipeline_state_object()
 {
 	pipeline_states.resize(5);
@@ -345,9 +402,18 @@ void loading_screen::create_pipeline_state_object()
 
 void loading_screen::make_default_ps()
 {
+	if (not object_futures[basic_vso]._Is_ready())
+	{
+		object_futures[basic_vso].wait();
+	}
+	if (not object_futures[basic_pso]._Is_ready())
+	{
+		object_futures[basic_pso].wait();
+	}
+
 	auto device = d3d->get_device();
-	auto vso = load_binary_file(L"vertex_shader.cso"),
-	     pso = load_binary_file(L"pixel_shader.cso");
+	auto &vso = files_loaded[basic_vso], //load_binary_file(L"vertex_shader.cso"),
+	     &pso = files_loaded[basic_pso]; //load_binary_file(L"pixel_shader.cso");
 
 	auto desc = pipeline_state::description
 	{
@@ -365,9 +431,18 @@ void loading_screen::make_default_ps()
 
 void loading_screen::make_light_ps()
 {
+	if (not object_futures[basic_vso]._Is_ready())
+	{
+		object_futures[basic_vso].wait();
+	}
+	if (not object_futures[light_pso]._Is_ready())
+	{
+		object_futures[light_pso].wait();
+	}
+
 	auto device = d3d->get_device();
-	auto vso = load_binary_file(L"vertex_shader.cso"),
-	     pso = load_binary_file(L"lighting.ps.cso");
+	auto &vso = files_loaded[basic_vso], // load_binary_file(L"vertex_shader.cso"),
+	     &pso = files_loaded[light_pso]; // load_binary_file(L"lighting.ps.cso");
 
 	auto light_desc = pipeline_state::description
 	{
@@ -386,9 +461,18 @@ void loading_screen::make_light_ps()
 
 void loading_screen::make_text_ps()
 {
+	if (not object_futures[text_vso]._Is_ready())
+	{
+		object_futures[text_vso].wait();
+	}
+	if (not object_futures[basic_pso]._Is_ready())
+	{
+		object_futures[basic_pso].wait();
+	}
+
 	auto device = d3d->get_device();
-	auto vso = load_binary_file(L"screen_space_text.vs.cso"),
-	     pso = load_binary_file(L"pixel_shader.cso");
+	auto &vso = files_loaded[text_vso], // load_binary_file(L"screen_space_text.vs.cso"),
+		&pso = files_loaded[basic_pso]; // load_binary_file(L"pixel_shader.cso");
 
 	auto screen_text_desc = pipeline_state::description
 	{
@@ -406,9 +490,18 @@ void loading_screen::make_text_ps()
 
 void loading_screen::make_cube_instance_ps()
 {
+	if (not object_futures[instance_vso]._Is_ready())
+	{
+		object_futures[instance_vso].wait();
+	}
+	if (not object_futures[basic_pso]._Is_ready())
+	{
+		object_futures[basic_pso].wait();
+	}
+
 	auto device = d3d->get_device();
-	auto vso = load_binary_file(L"cube_instances.vs.cso"),
-	     pso = load_binary_file(L"pixel_shader.cso");
+	auto &vso = files_loaded[instance_vso], // load_binary_file(L"cube_instances.vs.cso"),
+	     &pso = files_loaded[basic_pso]; // load_binary_file(L"pixel_shader.cso");
 
 	auto desc = pipeline_state::description
 	{
@@ -426,9 +519,18 @@ void loading_screen::make_cube_instance_ps()
 
 void loading_screen::make_sky_dome_ps()
 {
+	if (not object_futures[sky_vso]._Is_ready())
+	{
+		object_futures[sky_vso].wait();
+	}
+	if (not object_futures[sky_pso]._Is_ready())
+	{
+		object_futures[sky_pso].wait();
+	}
+
 	auto device = d3d->get_device();
-	auto vso = load_binary_file(L"sky_dome.vs.cso"),
-	     pso = load_binary_file(L"sky_dome.ps.cso");
+	auto &vso = files_loaded[sky_vso], // load_binary_file(L"sky_dome.vs.cso"),
+		&pso = files_loaded[sky_pso]; // load_binary_file(L"sky_dome.ps.cso");
 
 	auto sky_dome_desc = pipeline_state::description
 	{
@@ -667,7 +769,12 @@ void loading_screen::create_shader_resources()
 
 void loading_screen::make_cube_texture()
 {
-	auto tex = load_binary_file(L"uv_grid.dds");
+	if (not object_futures[uv_tex]._Is_ready())
+	{
+		object_futures[uv_tex].wait();
+	}
+
+	auto &tex = files_loaded[uv_tex]; // load_binary_file(L"uv_grid.dds");
 
 	auto device = d3d->get_device();
 	shader_resources[sr_cube] = std::make_unique<shader_resource>(device,
@@ -702,13 +809,24 @@ void loading_screen::make_text_texture()
 void loading_screen::make_sky_dome_texture()
 {
 	auto textures = std::vector<std::vector<uint8_t>>{};
+
+	auto copy_loaded_file = [&](uint16_t file_idx)
+	{
+		if (not object_futures[file_idx]._Is_ready())
+		{
+			object_futures[file_idx].wait();
+		}
+
+		textures.push_back(files_loaded[file_idx]);
+	};
+
 	
-	textures.emplace_back(load_binary_file(L"left.dds"));
-	textures.emplace_back(load_binary_file(L"right.dds"));
-	textures.emplace_back(load_binary_file(L"top.dds"));
-	textures.emplace_back(load_binary_file(L"bottom.dds"));
-	textures.emplace_back(load_binary_file(L"back.dds"));
-	textures.emplace_back(load_binary_file(L"front.dds"));
+	copy_loaded_file(left_tex);
+	copy_loaded_file(right_tex);
+	copy_loaded_file(top_tex);
+	copy_loaded_file(bottom_tex);
+	copy_loaded_file(back_tex);
+	copy_loaded_file(front_tex);
 
 	auto device = d3d->get_device();
 
@@ -874,7 +992,7 @@ void loading_screen::draw_sky()
 	mesh_buffers[mb_sky]->draw(context);
 }
 
-void dx11_lessons::loading_screen::update_load_status()
+void loading_screen::update_load_status()
 {
 	auto loaded_items = std::count_if(pipeline_states.begin(), pipeline_states.end(),
 								  [](const std::unique_ptr<pipeline_state> &ptr)
@@ -896,6 +1014,11 @@ void dx11_lessons::loading_screen::update_load_status()
 	{
 		return ptr != nullptr;
 	});
+	loaded_items += std::count_if(files_loaded.begin(), files_loaded.end(),
+								  [](const std::vector<uint8_t> &ptr)
+	{
+		return not ptr.empty();
+	});
 	loaded_items -= 5;
 
 	auto text = fmt::format(L"Loaded: {} of {}", loaded_items, object_futures.size());
@@ -911,7 +1034,7 @@ void dx11_lessons::loading_screen::update_load_status()
 	d2d->end();
 }
 
-void dx11_lessons::loading_screen::draw_load_status()
+void loading_screen::draw_load_status()
 {
 	auto context = d3d->get_context();
 	constant_buffers[cb_orthographic]->activate(context);
