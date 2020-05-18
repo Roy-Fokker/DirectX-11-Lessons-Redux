@@ -15,6 +15,7 @@
     <ProjectGuid>{e5dcdd02-f9f7-4aa5-8368-49c7f7f44fe4}</ProjectGuid>
     <RootNamespace>L6_First_Person_Camera</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>L06.First_Person_Camera</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">

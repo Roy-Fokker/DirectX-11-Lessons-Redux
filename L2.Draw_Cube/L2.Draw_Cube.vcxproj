@@ -15,6 +15,7 @@
     <ProjectGuid>{543713f2-0e9d-4e7f-8095-9762091380ad}</ProjectGuid>
     <RootNamespace>L2_Draw_Cube</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>L02.Draw_Cube</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">

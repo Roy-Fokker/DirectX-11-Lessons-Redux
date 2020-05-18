@@ -29,13 +29,13 @@ Library dependencies are installed via [vcpkg](https://github.com/microsoft/vcpk
 - Defines: UNICODE, NOMINMAX, WIN32_LEAN_AND_MEAN  ☜(ﾟヮﾟ☜)
 
 ## Subprojects
-- L1.Basic_Window: Create empty window displaying flat color.
-- L2.Draw_Cube: Draw a cube, use VS, PS and prespective projection.
-- L3.Textured_Cube: Draw a cube with textured faces.
-- L4.Direct2D: Draw text using Direct2D and DirectWrite.
-- L5.Lighting: Ambient, Diffuse and Specular shading on Cube. <-- *This is broken*.
-- L6.First_Person_Camera: First Person Camera and movement with keyboard and mouse.
-- L7.Cube_Instances: Draw hundreds of Cubes.
-- L8.Sky_Dome: Sky centered on Camera.
-- L9.Loading_Screen: Simple loading screen while waiting for textures/files to be read.
+- L01.Basic_Window: Create empty window displaying flat color.
+- L02.Draw_Cube: Draw a cube, use VS, PS and prespective projection.
+- L03.Textured_Cube: Draw a cube with textured faces.
+- L04.Direct2D: Draw text using Direct2D and DirectWrite.
+- L05.Lighting: Ambient, Diffuse and Specular shading on Cube. <-- *This is broken*.
+- L06.First_Person_Camera: First Person Camera and movement with keyboard and mouse.
+- L07.Cube_Instances: Draw hundreds of Cubes.
+- L08.Sky_Dome: Sky centered on Camera.
+- L09.Loading_Screen: Simple loading screen while waiting for textures/files to be read.
 - L10.Model_Loading: Loading mesh/model data from file with associated textures, and display it.

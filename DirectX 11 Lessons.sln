@@ -10,23 +10,25 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "common", "common\common.vcxitems", "{51F79271-E831-4E06-96E4-E56F457C1347}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "L1.Basic_Window", "L1.Basic_Window\L1.Basic_Window.vcxproj", "{AEFB7DCE-94DE-480B-B38E-E5970D76666B}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "L01.Basic_Window", "L1.Basic_Window\L1.Basic_Window.vcxproj", "{AEFB7DCE-94DE-480B-B38E-E5970D76666B}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "L2.Draw_Cube", "L2.Draw_Cube\L2.Draw_Cube.vcxproj", "{543713F2-0E9D-4E7F-8095-9762091380AD}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "L02.Draw_Cube", "L2.Draw_Cube\L2.Draw_Cube.vcxproj", "{543713F2-0E9D-4E7F-8095-9762091380AD}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "L3.Textured_Cube", "L3.Textured_Cube\L3.Textured_Cube.vcxproj", "{0881D2EA-6484-4C00-A159-3A2253E16C94}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "L03.Textured_Cube", "L3.Textured_Cube\L3.Textured_Cube.vcxproj", "{0881D2EA-6484-4C00-A159-3A2253E16C94}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "L4.Direct2D", "L4.Direct2D\L4.Direct2D.vcxproj", "{8ED8D1B4-8EFC-4170-8A08-8FEDEC489A42}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "L04.Direct2D", "L4.Direct2D\L4.Direct2D.vcxproj", "{8ED8D1B4-8EFC-4170-8A08-8FEDEC489A42}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "L5.Lighting", "L5.Lighting\L5.Lighting.vcxproj", "{45E6990B-2407-4A81-ACB0-4C4CBBAF5388}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "L05.Lighting", "L5.Lighting\L5.Lighting.vcxproj", "{45E6990B-2407-4A81-ACB0-4C4CBBAF5388}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "L6.First_Person_Camera", "L6.First_Person_Camera\L6.First_Person_Camera.vcxproj", "{E5DCDD02-F9F7-4AA5-8368-49C7F7F44FE4}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "L06.First_Person_Camera", "L6.First_Person_Camera\L6.First_Person_Camera.vcxproj", "{E5DCDD02-F9F7-4AA5-8368-49C7F7F44FE4}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "L7.Cube_Instances", "L7.Cube_Instances\L7.Cube_Instances.vcxproj", "{E91AC52D-601B-405C-B8D9-76D648AF331C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "L07.Cube_Instances", "L7.Cube_Instances\L7.Cube_Instances.vcxproj", "{E91AC52D-601B-405C-B8D9-76D648AF331C}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "L8.Sky_Dome", "L8.Sky_Dome\L8.Sky_Dome.vcxproj", "{EA0EEC37-5AE1-47DD-9EB7-C1C85D735ECA}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "L08.Sky_Dome", "L8.Sky_Dome\L8.Sky_Dome.vcxproj", "{EA0EEC37-5AE1-47DD-9EB7-C1C85D735ECA}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "L9.Loading_Screen", "L9.Loading_Screen\L9.Loading_Screen.vcxproj", "{E88D66A8-F984-414F-B43B-7BF73919BF8A}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "L09.Loading_Screen", "L9.Loading_Screen\L9.Loading_Screen.vcxproj", "{E88D66A8-F984-414F-B43B-7BF73919BF8A}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "L10.Model_Loading", "L10.Model_Loading\L10.Model_Loading.vcxproj", "{903C21B8-6F74-47A5-B9D5-579FC862DA9A}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -35,6 +37,7 @@ Global
 		common\common.vcxitems*{51f79271-e831-4e06-96e4-e56f457c1347}*SharedItemsImports = 9
 		common\common.vcxitems*{543713f2-0e9d-4e7f-8095-9762091380ad}*SharedItemsImports = 4
 		common\common.vcxitems*{8ed8d1b4-8efc-4170-8a08-8fedec489a42}*SharedItemsImports = 4
+		common\common.vcxitems*{903c21b8-6f74-47a5-b9d5-579fc862da9a}*SharedItemsImports = 4
 		common\common.vcxitems*{aefb7dce-94de-480b-b38e-e5970d76666b}*SharedItemsImports = 4
 		common\common.vcxitems*{e5dcdd02-f9f7-4aa5-8368-49c7f7f44fe4}*SharedItemsImports = 4
 		common\common.vcxitems*{e88d66a8-f984-414f-b43b-7bf73919bf8a}*SharedItemsImports = 4
@@ -82,6 +85,10 @@ Global
 		{E88D66A8-F984-414F-B43B-7BF73919BF8A}.Debug|x64.Build.0 = Debug|x64
 		{E88D66A8-F984-414F-B43B-7BF73919BF8A}.Release|x64.ActiveCfg = Release|x64
 		{E88D66A8-F984-414F-B43B-7BF73919BF8A}.Release|x64.Build.0 = Release|x64
+		{903C21B8-6F74-47A5-B9D5-579FC862DA9A}.Debug|x64.ActiveCfg = Debug|x64
+		{903C21B8-6F74-47A5-B9D5-579FC862DA9A}.Debug|x64.Build.0 = Debug|x64
+		{903C21B8-6F74-47A5-B9D5-579FC862DA9A}.Release|x64.ActiveCfg = Release|x64
+		{903C21B8-6F74-47A5-B9D5-579FC862DA9A}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

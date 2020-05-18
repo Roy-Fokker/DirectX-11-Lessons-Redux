@@ -15,6 +15,7 @@
     <ProjectGuid>{e91ac52d-601b-405c-b8d9-76d648af331c}</ProjectGuid>
     <RootNamespace>L7_Cube_Instances</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>L07.Cube_Instances</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">

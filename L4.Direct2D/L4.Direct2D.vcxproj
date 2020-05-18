@@ -15,6 +15,7 @@
     <ProjectGuid>{8ed8d1b4-8efc-4170-8a08-8fedec489a42}</ProjectGuid>
     <RootNamespace>L4_Direct2D</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>L04.Direct2D</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">

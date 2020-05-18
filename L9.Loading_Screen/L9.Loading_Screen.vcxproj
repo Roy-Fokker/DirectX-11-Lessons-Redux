@@ -15,6 +15,7 @@
     <ProjectGuid>{e88d66a8-f984-414f-b43b-7bf73919bf8a}</ProjectGuid>
     <RootNamespace>L9_Loading_Screen</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>L09.Loading_Screen</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
