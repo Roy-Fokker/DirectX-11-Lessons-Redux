@@ -93,26 +93,26 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="back.dds">
+    <CopyFileToFolders Include="back.dds">
       <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="bottom.dds">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="bottom.dds">
       <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="front.dds">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="front.dds">
       <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="left.dds">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="left.dds">
       <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="right.dds">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="right.dds">
       <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="top.dds">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="top.dds">
       <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="uv_grid.dds">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="uv_grid.dds">
       <Filter>Resource Files</Filter>
-    </Image>
+    </CopyFileToFolders>
   </ItemGroup>
 </Project>
