@@ -74,7 +74,7 @@ auto camera::get_view() const -> DirectX::XMMATRIX
 	return translation * rotation;
 }
 
-auto dx11_lessons::camera::get_position() const -> DirectX::XMVECTOR
+auto camera::get_position() const -> DirectX::XMVECTOR
 {
 	return position;
 }

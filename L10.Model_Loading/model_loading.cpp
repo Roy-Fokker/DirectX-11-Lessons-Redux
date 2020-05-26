@@ -681,8 +681,8 @@ void model_loading::make_prespective_cb()
 	auto device = d3d->get_device();
 	auto [width, height] = get_window_size(hWnd);
 
+	constexpr auto h_fov = XMConvertToRadians(field_of_view);
 	auto aspect_ratio = width / static_cast<float>(height);
-	auto h_fov = XMConvertToRadians(field_of_view);
 	auto v_fov = 2.0f * std::atan(std::tan(h_fov / 2.0f) * aspect_ratio);
 
 	auto projection = matrix{};
@@ -853,7 +853,7 @@ void model_loading::input_update(const game_clock &clk, const raw_input &input)
 
 	fp_cam->translate(dolly, pan, crane);
 
-	auto rotation_speed = 1.0f * static_cast<float>(clk.get_delta_s());
+	auto rotation_speed = XMConvertToRadians(field_of_view) * static_cast<float>(clk.get_delta_s());
 	auto roll = rotation_speed * input.get_axis_value(axis::rx) / 120.0f;
 	auto pitch = -rotation_speed * input.get_axis_value(axis::y);
 	auto yaw = -rotation_speed * input.get_axis_value(axis::x);
