@@ -1,5 +1,6 @@
 ﻿#include "helpers.h"
 
+#include <iostream>
 #include <fstream>
 #include <cassert>
 
@@ -37,4 +38,15 @@ auto dx11_lessons::load_binary_file(const std::filesystem::path &path) -> std::v
 	buffer.shrink_to_fit();
 
 	return buffer;
+}
+
+memory_stream::memory_stream(char const *base, size_t size) :
+	memory_buffer_stream(base, size), 
+	std::istream(static_cast<std::streambuf *>(this))
+{ }
+
+memory_buffer_stream::memory_buffer_stream(char const *base, size_t size)
+{
+	char *p(const_cast<char *>(base));
+	this->setg(p, p, p + size);
 }

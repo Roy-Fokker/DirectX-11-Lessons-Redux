@@ -7,7 +7,7 @@ using namespace dx11_lessons;
 
 namespace
 {
-	constexpr auto use_buffered_raw_input = true;
+	constexpr auto use_buffered_raw_input = false;
 	constexpr auto page_id = 0x01; 
 	constexpr auto usage_id = std::array{
 		0x06, // keyboard

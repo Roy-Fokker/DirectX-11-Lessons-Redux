@@ -17,6 +17,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)clock.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)helpers.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)logger.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)obj_mtl_parser.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)raw_input.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)window.cpp" />
   </ItemGroup>
@@ -24,6 +25,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)clock.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)helpers.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)logger.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)obj_mtl_parser.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)raw_input.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)window.h" />
   </ItemGroup>
