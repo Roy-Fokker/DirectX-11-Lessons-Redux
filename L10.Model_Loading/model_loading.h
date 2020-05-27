@@ -36,14 +36,10 @@ namespace dx11_lessons
 
 		void create_pipeline_state_object();
 		void make_default_ps();
-		void make_light_ps();
 		void make_text_ps();
-		void make_cube_instance_ps();
 		void make_sky_dome_ps();
 
 		void create_mesh_buffers();
-		void make_cube_mesh();
-		void make_cube_instance_mesh();
 		void make_text_mesh();
 		void make_sky_dome_mesh();
 		
@@ -51,23 +47,16 @@ namespace dx11_lessons
 		void make_prespective_cb();
 		void make_orthographic_cb();
 		void make_view_cb();
-		void make_cube_transform_cb();
 		void make_text_transform_cb();
-		void make_light_data_cb();
-
+		
 		void create_shader_resources();
-		void make_cube_texture();
 		void make_text_texture();
 		void make_sky_dome_texture();
 
 		void input_update(const game_clock &clk, const raw_input &input);
-		void cube_update(const game_clock &clk);
 		void camera_update();
 		void text_update(const game_clock &clk);
-		void cube_instance_update(const game_clock &clk);
 
-		void draw_cube();
-		void draw_cube_instances();
 		void draw_text();
 		void draw_sky();
 
@@ -89,8 +78,6 @@ namespace dx11_lessons
 
 		std::unique_ptr<camera> fp_cam{};
 		
-		float cube_angle{};
-
 		std::vector<std::future<bool>> object_futures;
 		std::vector<std::vector<uint8_t>> files_loaded;
 	};

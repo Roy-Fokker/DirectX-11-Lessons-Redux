@@ -195,15 +195,11 @@ namespace
 	{
 		ps_default,
 		ps_text,
-		ps_light,
-		ps_instancing,
 		ps_sky,
 	};
 
 	enum mb_ids
 	{
-		mb_cube,
-		mb_cubes,
 		mb_text,
 		mb_sky,
 	};
@@ -214,26 +210,20 @@ namespace
 		cb_orthographic,
 		cb_camera,
 		cb_text,
-		cb_cube,
-		cb_light,
 	};
 
 	enum sr_ids
 	{
 		sr_text,
-		sr_cube,
 		sr_sky,
 	};
 
 	auto list_of_files_to_load = std::array{
 		L"vertex_shader.cso"sv,
 		L"pixel_shader.cso"sv,
-		L"lighting.ps.cso"sv,
 		L"screen_space_text.vs.cso"sv,
-		L"cube_instances.vs.cso"sv,
 		L"sky_dome.vs.cso"sv,
 		L"sky_dome.ps.cso"sv,
-		L"uv_grid.dds"sv,
 		L"left.dds"sv,
 		L"right.dds"sv,
 		L"top.dds"sv,
@@ -245,13 +235,10 @@ namespace
 	enum file_list
 	{
 		basic_vso, 
-		basic_pso, 
-		light_pso,
+		basic_pso,
 		text_vso,
-		instance_vso,
 		sky_vso,
 		sky_pso,
-		uv_tex,
 		left_tex,
 		right_tex,
 		top_tex,
@@ -315,9 +302,7 @@ void model_loading::update(const game_clock &clk, const raw_input &input)
 	if (all_good)
 	{
 		input_update(clk, input);
-		cube_update(clk);
 		camera_update();
-		cube_instance_update(clk);
 		text_update(clk);
 	}
 	else
@@ -340,8 +325,7 @@ void model_loading::render()
 	{
 		constant_buffers[cb_prespective]->activate(context);
 		constant_buffers[cb_camera]->activate(context);
-		draw_cube();
-		draw_cube_instances();
+		
 		draw_sky();
 
 		constant_buffers[cb_orthographic]->activate(context);
@@ -380,18 +364,7 @@ void model_loading::create_pipeline_state_object()
 		make_default_ps();
 		return true;
 	}));
-	object_futures.emplace_back(
-		std::async(std::launch::async, [&]
-	{
-		make_light_ps();
-		return true;
-	}));
-	object_futures.emplace_back(
-		std::async(std::launch::async, [&]
-	{
-		make_cube_instance_ps();
-		return true;
-	}));
+
 	object_futures.emplace_back(
 		std::async(std::launch::async, [&]
 	{
@@ -429,36 +402,6 @@ void model_loading::make_default_ps()
 	pipeline_states[ps_default] = std::make_unique<pipeline_state>(device, desc);
 }
 
-void model_loading::make_light_ps()
-{
-	if (not object_futures[basic_vso]._Is_ready())
-	{
-		object_futures[basic_vso].wait();
-	}
-	if (not object_futures[light_pso]._Is_ready())
-	{
-		object_futures[light_pso].wait();
-	}
-
-	auto device = d3d->get_device();
-	auto &vso = files_loaded[basic_vso], // load_binary_file(L"vertex_shader.cso"),
-	     &pso = files_loaded[light_pso]; // load_binary_file(L"lighting.ps.cso");
-
-	auto light_desc = pipeline_state::description
-	{
-		bs::alpha,
-		ds::read_write,
-		rs::cull_anti_clockwise,
-		ss::anisotropic_clamp,
-		vertex_elements,
-		vso,
-		pso,
-		D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST
-	};
-
-	pipeline_states[ps_light] = std::make_unique<pipeline_state>(device, light_desc);
-}
-
 void model_loading::make_text_ps()
 {
 	if (not object_futures[text_vso]._Is_ready())
@@ -486,35 +429,6 @@ void model_loading::make_text_ps()
 		D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST
 	};
 	pipeline_states[ps_text]= std::make_unique<pipeline_state>(device, screen_text_desc);
-}
-
-void model_loading::make_cube_instance_ps()
-{
-	if (not object_futures[instance_vso]._Is_ready())
-	{
-		object_futures[instance_vso].wait();
-	}
-	if (not object_futures[basic_pso]._Is_ready())
-	{
-		object_futures[basic_pso].wait();
-	}
-
-	auto device = d3d->get_device();
-	auto &vso = files_loaded[instance_vso], // load_binary_file(L"cube_instances.vs.cso"),
-	     &pso = files_loaded[basic_pso]; // load_binary_file(L"pixel_shader.cso");
-
-	auto desc = pipeline_state::description
-	{
-		bs::opaque,
-		ds::read_write,
-		rs::cull_anti_clockwise,
-		ss::anisotropic_clamp,
-		instanced_vertex_elements,
-		vso,
-		pso,
-		D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST
-	};
-	pipeline_states[ps_instancing] = std::make_unique<pipeline_state>(device, desc);
 }
 
 void model_loading::make_sky_dome_ps()
@@ -556,59 +470,9 @@ void model_loading::create_mesh_buffers()
 	object_futures.emplace_back(
 		std::async(std::launch::async, [&]
 	{
-		make_cube_mesh();
-		return true;
-	}));
-	object_futures.emplace_back(
-		std::async(std::launch::async, [&]
-	{
-		make_cube_instance_mesh();
-		return true;
-	}));
-	object_futures.emplace_back(
-		std::async(std::launch::async, [&]
-	{
 		make_sky_dome_mesh();
 		return true;
 	}));
-}
-
-void model_loading::make_cube_mesh()
-{
-	auto device = d3d->get_device();
-	auto cube_mesh = spherify_and_invert(cube_base, 2);
-	mesh_buffers[mb_cube] = std::make_unique<mesh_buffer>(device, cube_mesh);
-}
-
-void model_loading::make_cube_instance_mesh()
-{
-	auto device = d3d->get_device();
-	auto l = 1.0f,
-		w = 1.0f,
-		h = 1.0f;
-
-	auto front_normal = XMFLOAT3{ 0.0f, 0.0f, 1.0f }, back_normal = XMFLOAT3{ 0.0f,  0.0f, -1.0f },
-		left_normal = XMFLOAT3{ -1.0f, 0.0f, 0.0f }, right_normal = XMFLOAT3{ 1.0f,  0.0f,  0.0f },
-		top_normal = XMFLOAT3{ 0.0f, 1.0f, 0.0f }, bottom_normal = XMFLOAT3{ 0.0f, -1.0f,  0.0f };
-
-	auto cube_mesh = instanced_mesh{
-		cube_base.vertices, 
-		cube_base.indicies
-	};
-
-	cube_mesh.instance_transforms.resize(100);
-	for (auto &&[idx, transform] : cube_mesh.instance_transforms | iter::enumerate)
-	{
-		auto i = static_cast<int>(idx);
-		constexpr auto x_max = 10;
-		float x = -15.0f + 3.0f * (i % x_max),
-		      z = -30.0f + 3.0f * (i / x_max);
-
-		transform.data = XMMatrixTranslation(x, 0.0f, z);
-		transform.data = XMMatrixTranspose(transform.data);
-	}
-
-	mesh_buffers[mb_cubes] = std::make_unique<mesh_buffer>(device, cube_mesh);
 }
 
 void model_loading::make_text_mesh()
@@ -662,18 +526,6 @@ void model_loading::create_contant_buffers()
 		make_view_cb();
 		return true;
 	}));
-	object_futures.emplace_back(
-		std::async(std::launch::async, [&]
-	{
-		make_cube_transform_cb();
-		return true;
-	}));
-	object_futures.emplace_back(
-		std::async(std::launch::async, [&]
-	{
-		make_light_data_cb();
-		return true;
-	}));
 }
 
 void model_loading::make_prespective_cb()
@@ -715,16 +567,6 @@ void model_loading::make_view_cb()
 	constant_buffers[cb_camera] = std::make_unique<constant_buffer>(device, stage::vertex, slot::view, view);
 }
 
-void model_loading::make_cube_transform_cb()
-{
-	auto device = d3d->get_device();
-
-	auto cube_pos = matrix{ XMMatrixTranslation(0.0f, 1.0f, 0.0f) };
-	cube_pos.data = XMMatrixTranspose(cube_pos.data);
-	constant_buffers[cb_cube] = std::make_unique<constant_buffer>(device, stage::vertex, slot::transform, cube_pos);
-
-}
-
 void model_loading::make_text_transform_cb()
 {
 	auto device = d3d->get_device();
@@ -732,19 +574,6 @@ void model_loading::make_text_transform_cb()
 	auto text_pos = matrix{ XMMatrixTranslation(0.0f, 0.0f, 0.0f) };
 	text_pos.data = XMMatrixTranspose(text_pos.data);
 	constant_buffers[cb_text] = std::make_unique<constant_buffer>(device, stage::vertex, slot::transform, text_pos);
-}
-
-void model_loading::make_light_data_cb()
-{
-	auto device = d3d->get_device();
-
-	auto light_data = light{};
-	light_data.diffuse = { 0.0f, 0.0f, 1.0f, 1.0f };
-	light_data.ambient = { 0.0f, 1.0f, 0.0f, 1.0f };
-	light_data.light_pos = { 0.0f, 3.0f, 5.0f };
-	light_data.specular_power = 32.0f;
-	light_data.specular = { 1.0f, 0.0f, 0.0f, 1.0f };
-	constant_buffers[cb_light] = std::make_unique<constant_buffer>(device, stage::pixel, slot::light, light_data);
 }
 
 void model_loading::create_shader_resources()
@@ -756,30 +585,9 @@ void model_loading::create_shader_resources()
 	object_futures.emplace_back(
 		std::async(std::launch::async, [&]
 	{
-		make_cube_texture();
-		return true;
-	}));
-	object_futures.emplace_back(
-		std::async(std::launch::async, [&]
-	{
 		make_sky_dome_texture();
 		return true;
 	}));
-}
-
-void model_loading::make_cube_texture()
-{
-	if (not object_futures[uv_tex]._Is_ready())
-	{
-		object_futures[uv_tex].wait();
-	}
-
-	auto &tex = files_loaded[uv_tex]; // load_binary_file(L"uv_grid.dds");
-
-	auto device = d3d->get_device();
-	shader_resources[sr_cube] = std::make_unique<shader_resource>(device,
-	                                            shader_stage::pixel, shader_slot::texture,
-	                                            tex);
 }
 
 void model_loading::make_text_texture()
@@ -802,8 +610,8 @@ void model_loading::make_text_texture()
 	assert(SUCCEEDED(hr));
 
 	shader_resources[sr_text] = std::make_unique<shader_resource>(device,
-	                                            shader_stage::pixel, shader_slot::texture,
-	                                            text_tex);
+																  shader_stage::pixel, shader_slot::texture,
+																  text_tex);
 }
 
 void model_loading::make_sky_dome_texture()
@@ -831,8 +639,8 @@ void model_loading::make_sky_dome_texture()
 	auto device = d3d->get_device();
 
 	shader_resources[sr_sky] = std::make_unique<shader_resource>(device,
-	                                                shader_stage::pixel, shader_slot::texture,
-	                                                textures);
+																 shader_stage::pixel, shader_slot::texture,
+																 textures);
 }
 
 void model_loading::input_update(const game_clock &clk, const raw_input &input)
@@ -859,26 +667,6 @@ void model_loading::input_update(const game_clock &clk, const raw_input &input)
 	auto yaw = -rotation_speed * input.get_axis_value(axis::x);
 
 	fp_cam->rotate(roll, pitch, yaw);
-}
-
-void model_loading::cube_update(const game_clock &clk)
-{
-	auto [width, height] = get_window_size(hWnd);
-	auto context = d3d->get_context();
-
-	cube_angle += 90.0f * static_cast<float>(clk.get_delta_s());
-	if (cube_angle >= 360.0f)
-	{
-		cube_angle -= 360.0f;
-	}
-	
-	auto angle = XMConvertToRadians(cube_angle);
-	auto cube_pos = matrix{ XMMatrixIdentity() };
-	cube_pos.data = XMMatrixRotationY(angle);
-	cube_pos.data *= XMMatrixTranslation(0.0f, 1.0f, 0.0f);
-	cube_pos.data = XMMatrixTranspose(cube_pos.data);
-
-	constant_buffers[cb_cube]->update(context, cube_pos);
 }
 
 void model_loading::camera_update()
@@ -912,7 +700,7 @@ void model_loading::text_update(const game_clock &clk)
 	frame_count = 0;
 	total_time = 0.0;
 
-	auto fps_text = fmt::format(L"FPS: {:.2f}\nAngle: {:06.2f}", fps, cube_angle);
+	auto fps_text = fmt::format(L"FPS: {:.2f}\n", fps);
 
 	auto format = d2d->make_text_format(L"Consolas", 12.0f);
 	auto brush = d2d->make_solid_color_brush(D2D1::ColorF(D2D1::ColorF::Yellow));
@@ -923,50 +711,6 @@ void model_loading::text_update(const game_clock &clk)
 	               { static_cast<float>(width), static_cast<float>(height) },
 	               format, brush);
 	d2d->end();
-}
-
-void model_loading::cube_instance_update(const game_clock &clk)
-{
-	auto transforms = std::vector<matrix>(100);
-
-	for (auto &&[idx, transform] : transforms | iter::enumerate)
-	{
-		auto i = static_cast<int>(idx);
-		constexpr auto x_max = 10;
-		auto x = -15.0f + 3.0f * (i % x_max),
-		     z = -30.0f + 3.0f * (i / x_max);
-		auto angle = XMConvertToRadians(cube_angle + (i * 10));
-		
-		transform.data = XMMatrixRotationZ(angle);
-		transform.data *= XMMatrixTranslation(x, 0.0f, z);
-		transform.data = XMMatrixTranspose(transform.data);
-	}
-
-	mesh_buffers[mb_cubes]->update_instances(d3d->get_context(), transforms);
-}
-
-void model_loading::draw_cube()
-{
-	auto context = d3d->get_context();
-	
-	pipeline_states[ps_light]->activate(context);
-	constant_buffers[cb_light]->activate(context);
-	constant_buffers[cb_cube]->activate(context);
-	shader_resources[sr_cube]->activate(context);
-	mesh_buffers[mb_cube]->activate(context);
-
-	mesh_buffers[mb_cube]->draw(context);
-}
-
-void model_loading::draw_cube_instances()
-{
-	auto context = d3d->get_context();
-
-	pipeline_states[ps_instancing]->activate(context);
-	shader_resources[sr_cube]->activate(context);
-	mesh_buffers[mb_cubes]->activate(context);
-
-	mesh_buffers[mb_cubes]->draw(context);
 }
 
 void model_loading::draw_text()
