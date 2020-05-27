@@ -50,4 +50,6 @@ namespace dx11_lessons
 	{
 		return ltrim(rtrim(str));
 	}
+
+	auto open_file_dialog(HWND hWnd) -> std::filesystem::path;
 }

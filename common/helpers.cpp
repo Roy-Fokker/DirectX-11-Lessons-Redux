@@ -1,8 +1,12 @@
 ﻿#include "helpers.h"
 
+#include <ShlObj.h>
+#include <atlbase.h>
+
 #include <iostream>
 #include <fstream>
 #include <cassert>
+
 
 using namespace dx11_lessons;
 
@@ -38,6 +42,47 @@ auto dx11_lessons::load_binary_file(const std::filesystem::path &path) -> std::v
 	buffer.shrink_to_fit();
 
 	return buffer;
+}
+
+auto dx11_lessons::open_file_dialog(HWND hWnd) -> std::filesystem::path
+{
+	::CoInitialize(NULL);
+
+	constexpr auto file_types = std::array<COMDLG_FILTERSPEC, 1>
+	{
+		{
+			L"Wavefront (*.obj)", L"*.obj"
+		},
+	};
+
+	auto file_name = std::filesystem::path{};
+	auto file_dialog = CComPtr<IFileDialog>{};
+	auto hr = ::CoCreateInstance(CLSID_FileOpenDialog,
+	                             nullptr,
+	                             CLSCTX_INPROC_SERVER,
+	                             IID_PPV_ARGS(&file_dialog));
+	assert(SUCCEEDED(hr));
+
+	file_dialog->SetTitle(L"Select obj model to view");
+	file_dialog->SetFileTypes(static_cast<uint32_t>(file_types.size()),
+	                          file_types.data());
+
+	hr = file_dialog->Show(hWnd);
+	if (FAILED(hr))
+	{
+		return {};
+	}
+
+	auto shell_item = CComPtr<IShellItem>{};
+	hr = file_dialog->GetResult(&shell_item);
+	assert(SUCCEEDED(hr));
+
+	auto file_name_ptr = PWSTR{};
+	hr = shell_item->GetDisplayName(SIGDN_FILESYSPATH, &file_name_ptr);
+	assert(SUCCEEDED(hr));
+
+	file_name.assign(file_name_ptr);
+	return file_name;
 }
 
 memory_stream::memory_stream(char const *base, size_t size) :
