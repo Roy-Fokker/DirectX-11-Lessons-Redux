@@ -23,6 +23,7 @@ namespace dx11_lessons
 			std::string mtl_name;
 		};
 
+		auto bounding_box() const -> std::vector<float3>;
 		auto vertices() const -> std::vector<float3>;
 		auto normals() const -> std::vector<float3>;
 		auto uv() const -> std::vector<float2>;
@@ -33,6 +34,7 @@ namespace dx11_lessons
 		void parse_obj(const std::vector<uint8_t> &file_data);
 
 	private:
+		std::vector<float3> o_bb;
 		std::vector<float3> o_v;
 		std::vector<float3> o_vn;
 		std::vector<float2> o_vt;

@@ -16,7 +16,6 @@ namespace
 {
 	using rule_function = std::function<void()>;
 	using parsing_rules = std::unordered_map<std::string, rule_function>;
-
 }
 
 obj_parser::obj_parser(const std::vector<uint8_t> &file_data)
@@ -25,6 +24,11 @@ obj_parser::obj_parser(const std::vector<uint8_t> &file_data)
 }
 
 obj_parser::~obj_parser() = default;
+
+auto obj_parser::bounding_box() const -> std::vector<float3>
+{
+	return o_bb;
+}
 
 auto obj_parser::vertices() const -> std::vector<float3>
 {
@@ -54,11 +58,11 @@ auto obj_parser::mtl_files() const -> std::vector<std::string>
 void obj_parser::parse_obj(const std::vector<uint8_t> &file_data)
 {
 	auto data_stream = memory_stream(reinterpret_cast<const char *>(file_data.data()), 
-									 file_data.size());
+	                                 file_data.size());
 
 	auto g_idx = -1;
 
-	auto parse_vert_str = [](const std::string &vert_str) -> uint3
+	auto parse_face_str = [](const std::string &vert_str) -> uint3
 	{
 		auto return_val = uint3{};
 
@@ -73,6 +77,20 @@ void obj_parser::parse_obj(const std::vector<uint8_t> &file_data)
 			it_start = (it_next != vert_str.end()) ? ++it_next : vert_str.end();
 		}
 		return return_val;
+	};
+
+	auto min_bb_xyz = float3{},
+	     max_bb_xyz = float3{};
+
+	auto update_bb_min_max = [&](const float3 &v)
+	{
+		min_bb_xyz[0] = std::min(v[0], min_bb_xyz[0]);
+		min_bb_xyz[1] = std::min(v[1], min_bb_xyz[1]);
+		min_bb_xyz[2] = std::min(v[2], min_bb_xyz[2]);
+
+		max_bb_xyz[0] = std::max(v[0], max_bb_xyz[0]);
+		max_bb_xyz[1] = std::max(v[1], max_bb_xyz[1]);
+		max_bb_xyz[2] = std::max(v[2], max_bb_xyz[2]);
 	};
 
 	auto obj_rules = parsing_rules {
@@ -101,12 +119,13 @@ void obj_parser::parse_obj(const std::vector<uint8_t> &file_data)
 		auto elem_idx_str = std::string{};
 		while (face_stream >> elem_idx_str)
 		{
-			grp.indicies.push_back(parse_vert_str(elem_idx_str));
+			grp.indicies.push_back(parse_face_str(elem_idx_str));
 		}
 	}},
 	{ "v", [&]() {
 		auto &pos = o_v.emplace_back();
 		data_stream >> pos[0] >> pos[1] >> pos[2];
+		update_bb_min_max(pos);
 	}},
 	{ "vn", [&]() {
 		auto &nor = o_vn.emplace_back();
@@ -131,6 +150,17 @@ void obj_parser::parse_obj(const std::vector<uint8_t> &file_data)
 
 		rule->second();
 	}
+
+	o_bb = std::vector{
+		max_bb_xyz,
+		{ min_bb_xyz[0], max_bb_xyz[1], max_bb_xyz[2] },
+		{ min_bb_xyz[0], max_bb_xyz[1], min_bb_xyz[2] },
+		{ max_bb_xyz[0], max_bb_xyz[1], min_bb_xyz[2] },
+		min_bb_xyz,
+		{ min_bb_xyz[0], min_bb_xyz[1], max_bb_xyz[2] },
+		{ min_bb_xyz[0], min_bb_xyz[1], min_bb_xyz[2] },
+		{ max_bb_xyz[0], min_bb_xyz[1], min_bb_xyz[2] },
+	};
 }
 
 mtl_parser::mtl_parser(const std::vector<uint8_t> &file_data)
@@ -147,7 +177,8 @@ auto mtl_parser::materials() const -> std::vector<material>
 
 void mtl_parser::parse_mtl(const std::vector<uint8_t> &file_data)
 {
-	auto data_stream = memory_stream(reinterpret_cast<const char *>(file_data.data()), file_data.size());
+	auto data_stream = memory_stream(reinterpret_cast<const char *>(file_data.data()), 
+	                                 file_data.size());
 
 	auto mtl_idx = -1;
 
