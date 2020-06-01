@@ -3,79 +3,73 @@
 #include <vector>
 #include <array>
 #include <string_view>
+#include <filesystem>
 
 namespace dx11_lessons
 {
-	class obj_parser
+	struct obj_data
 	{
-	public:
-		obj_parser() = delete;
-		obj_parser(const std::vector<uint8_t> &file_data);
-		~obj_parser();
+		using position = std::array<float, 3>;
+		using uv_coord = std::array<float, 2>;
+		using normal = std::array<float, 3>;
+		using file_path = std::filesystem::path;
+		
+		std::array<position, 8> bounding_box;
+		std::vector<position> vertices;
+		std::vector<normal> normals;
+		std::vector<uv_coord> uv_coords;
 
-		using float3 = std::array<float, 3>;
-		using float2 = std::array<float, 2>;
-		using uint3 = std::array<uint32_t, 3>;
 		struct group
 		{
 			std::string name;
-			std::vector<uint3> indicies;
-			std::string mtl_name;
+			std::string material_name;
+			uint32_t index_start;
+			uint32_t index_count;
 		};
 
-		auto bounding_box() const -> std::vector<float3>;
-		auto vertices() const -> std::vector<float3>;
-		auto normals() const -> std::vector<float3>;
-		auto uv() const -> std::vector<float2>;
-		auto sub_mesh_list() const -> std::vector<group>;
-		auto mtl_files() const -> std::vector<std::string>;
+		std::vector<group> groups;
 
-	private:
-		void parse_obj(const std::vector<uint8_t> &file_data);
-
-	private:
-		std::vector<float3> o_bb;
-		std::vector<float3> o_v;
-		std::vector<float3> o_vn;
-		std::vector<float2> o_vt;
-		std::vector<group> o_g;
-		std::vector<std::string> mtllib;
+		std::vector<file_path> mtl_files;
 	};
 
-	class mtl_parser
+	struct mtl_data
 	{
-	public:
-		mtl_parser() = delete;
-		mtl_parser(const std::vector<uint8_t> &file_data);
-		~mtl_parser();
+		using color = std::array<float, 3>;
+		using file_path = std::filesystem::path;
 
-		using float3 = std::array<float, 3>;
 		struct material
 		{
 			std::string name;
 
-			float3 color_ambient;
-			float3 color_diffuse;
-			float3 color_specular;
+			color color_ambient;
+			color color_diffuse;
+			color color_specular;
 
 			float shininess;
 			float transparency;
 			uint8_t illumination_type;
 
-			std::string tex_ambient;
-			std::string tex_diffuse;
-			std::string tex_specular;
-			std::string tex_shininess;
-			std::string tex_transparency;
-			std::string tex_bump;
+			file_path tex_ambient;
+			file_path tex_diffuse;
+			file_path tex_specular;
+			file_path tex_shininess;
+			file_path tex_transparency;
+			file_path tex_bump;
 		};
 
-		auto materials() const->std::vector<material>;
+		std::vector<material> materials;
+	};
 
-	private:
+	auto parse_obj(const std::vector<uint8_t> &file_data) -> obj_data;
+	auto parse_mtl(const std::vector<uint8_t> &file_data) -> mtl_data;
+
+	class obj_parser
+	{
+		void parse_obj(const std::vector<uint8_t> &file_data);
+	};
+
+	class mtl_parser
+	{
 		void parse_mtl(const std::vector<uint8_t> &file_data);
-
-	private:
-		std::vector<material> mtls;
 	};
 }

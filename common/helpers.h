@@ -26,23 +26,23 @@ namespace dx11_lessons
 	template<class T> [[nodiscard]]
 	auto ltrim(const std::basic_string<T> &str) -> std::basic_string<T>
 	{
-		auto last_char_it = std::find_if(str.begin(), str.end(), [](T ch)
+		auto first_char_it = std::find_if(str.begin(), str.end(), [](T ch)
 		{
 			return !std::isspace<T>(ch, std::locale::classic());
 		});
 
-		return std::basic_string<T>(str.begin(), last_char_it);
+		return std::basic_string<T>(first_char_it, str.end());
 	}
 
 	template<class T> [[nodiscard]]
 	auto rtrim(const std::basic_string<T> &str) -> std::basic_string<T>
 	{
-		auto first_char_it = std::find_if(str.rbegin(), str.rend(), [](T ch)
+		auto last_char_it = std::find_if(str.rbegin(), str.rend(), [](T ch)
 		{
 			return !std::isspace<T>(ch, std::locale::classic());
 		});
 
-		return std::basic_string<T>(first_char_it.base(), str.end());
+		return std::basic_string<T>(str.begin(), last_char_it.base());
 	}
 
 	template <typename T> [[nodiscard]]

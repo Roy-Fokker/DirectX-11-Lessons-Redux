@@ -10,6 +10,7 @@
 #include "camera.h"
 #include "raw_input.h"
 #include "clock.h"
+#include "obj_mtl_parser.h"
 #include "helpers.h"
 
 #include <cppitertools\enumerate.hpp>
@@ -337,6 +338,17 @@ void model_loading::render()
 
 void model_loading::load_files()
 {
+	auto obj_file = open_file_dialog(hWnd);
+	auto obj_file_data = load_binary_file(obj_file);
+	auto obj_data_v = parse_obj(obj_file_data);
+	auto mtl_data_v = std::vector<mtl_data>{};
+	for (auto &mtl_file : obj_data_v.mtl_files)
+	{
+		mtl_file = obj_file.parent_path() / mtl_file;
+		auto mtl_file_data = load_binary_file(mtl_file);
+		mtl_data_v.push_back(parse_mtl(mtl_file_data));
+	}
+
 	files_loaded.resize(list_of_files_to_load.size());
 
 	auto load_file_async = [&](uint16_t idx, std::wstring_view file_name)
@@ -348,7 +360,7 @@ void model_loading::load_files()
 	for (auto &&[i, filename] : list_of_files_to_load | iter::enumerate)
 	{
 		object_futures.emplace_back(
-			std::async(std::launch::async, load_file_async, static_cast<uint16_t>(i), filename));
+		    std::async(std::launch::async, load_file_async, static_cast<uint16_t>(i), filename));
 	}
 }
 
@@ -415,7 +427,7 @@ void model_loading::make_text_ps()
 
 	auto device = d3d->get_device();
 	auto &vso = files_loaded[text_vso], // load_binary_file(L"screen_space_text.vs.cso"),
-		&pso = files_loaded[basic_pso]; // load_binary_file(L"pixel_shader.cso");
+	     &pso = files_loaded[basic_pso]; // load_binary_file(L"pixel_shader.cso");
 
 	auto screen_text_desc = pipeline_state::description
 	{
@@ -444,7 +456,7 @@ void model_loading::make_sky_dome_ps()
 
 	auto device = d3d->get_device();
 	auto &vso = files_loaded[sky_vso], // load_binary_file(L"sky_dome.vs.cso"),
-		&pso = files_loaded[sky_pso]; // load_binary_file(L"sky_dome.ps.cso");
+	     &pso = files_loaded[sky_pso]; // load_binary_file(L"sky_dome.ps.cso");
 
 	auto sky_dome_desc = pipeline_state::description
 	{
@@ -609,9 +621,10 @@ void model_loading::make_text_texture()
 	auto hr = device->CreateTexture2D(&td, nullptr, &text_tex);
 	assert(SUCCEEDED(hr));
 
-	shader_resources[sr_text] = std::make_unique<shader_resource>(device,
-																  shader_stage::pixel, shader_slot::texture,
-																  text_tex);
+	shader_resources[sr_text] = 
+	    std::make_unique<shader_resource>(device,
+	                                      shader_stage::pixel, shader_slot::texture,
+	                                      text_tex);
 }
 
 void model_loading::make_sky_dome_texture()
@@ -638,9 +651,10 @@ void model_loading::make_sky_dome_texture()
 
 	auto device = d3d->get_device();
 
-	shader_resources[sr_sky] = std::make_unique<shader_resource>(device,
-																 shader_stage::pixel, shader_slot::texture,
-																 textures);
+	shader_resources[sr_sky] = 
+	    std::make_unique<shader_resource>(device,
+	                                      shader_stage::pixel, shader_slot::texture,
+	                                      textures);
 }
 
 void model_loading::input_update(const game_clock &clk, const raw_input &input)
