@@ -46,13 +46,13 @@ namespace
 	{
 		return {
 			min_point,
-			{ min_point[0], max_point[1], max_point[2] },
-			{ min_point[0], max_point[1], min_point[2] },
-			{ max_point[0], max_point[1], min_point[2] },
+			{ min_point.x, max_point.y, max_point.z },
+			{ min_point.x, max_point.y, min_point.z },
+			{ max_point.x, max_point.y, min_point.z },
 			max_point,
-			{ min_point[0], min_point[1], max_point[2] },
-			{ min_point[0], min_point[1], min_point[2] },
-			{ max_point[0], min_point[1], min_point[2] },
+			{ min_point.x, min_point.y, max_point.z },
+			{ min_point.x, min_point.y, min_point.z },
+			{ max_point.x, min_point.y, min_point.z },
 		};
 	}
 
@@ -78,9 +78,10 @@ namespace
 			out_grp.name = in_grp.name;
 			out_grp.material_name = mtl_name;
 
-			out_grp.index_start = static_cast<uint32_t>(output.vertices.size());
+			out_grp.index_start = static_cast<uint32_t>(output.indicies.size());
 			for (auto &&[vi, ti, ni] : in_grp.face_indicies)
 			{
+				output.indicies.push_back(static_cast<uint32_t>(output.indicies.size()));
 				auto v = verticies.at(vi);
 				output.vertices.push_back(v);
 				auto n = normals.at(ni);
@@ -88,7 +89,7 @@ namespace
 				auto t = uvs.at(ti);
 				output.uv_coords.push_back(t);
 			}
-			out_grp.index_count = static_cast<uint32_t>(output.vertices.size()) - out_grp.index_start;
+			out_grp.index_count = static_cast<uint32_t>(output.indicies.size()) - out_grp.index_start;
 		}
 
 		return output;
@@ -129,11 +130,15 @@ auto dx11_lessons::parse_obj(const std::vector<uint8_t> &file_data) -> obj_data
 
 	auto update_minmax_points = [&min_point, &max_point](const obj_data::position &v)
 	{
-		for (auto &&[ip, ap, vp] : iter::zip(min_point, max_point, v))
+		auto update_point = [](float &min, float &max, const float &val)
 		{
-			ip = std::min(vp, ip);
-			ap = std::max(vp, ap);
-		}
+			min = std::min(min, val);
+			max = std::max(max, val);
+		};
+
+		update_point(min_point.x, max_point.x, v.x);
+		update_point(min_point.y, max_point.y, v.y);
+		update_point(min_point.z, max_point.z, v.z);
 	};
 
 	auto get_active_group = [&]() -> obj_group &
@@ -177,16 +182,16 @@ auto dx11_lessons::parse_obj(const std::vector<uint8_t> &file_data) -> obj_data
 		} },
 		{ "v", [&]() {
 			auto &pos = obj_v.emplace_back();
-			data_stream >> pos[0] >> pos[1] >> pos[2];
+			data_stream >> pos.x >> pos.y >> pos.z;
 			update_minmax_points(pos);
 		} },
 		{ "vn", [&]() {
 			auto &nor = obj_vn.emplace_back();
-			data_stream >> nor[0] >> nor[1] >> nor[2];
+			data_stream >> nor.x >> nor.y >> nor.z;
 		} },
 		{ "vt", [&](){
 			auto &uv = obj_vt.emplace_back();
-			data_stream >> uv[0] >> uv[1];
+			data_stream >> uv.x >> uv.y;
 		} },
 	};
 
@@ -271,6 +276,7 @@ auto dx11_lessons::parse_mtl(const std::vector<uint8_t> &file_data) -> mtl_data
 		{ "illum", [&]() {
 			auto &&mtl = get_active_mtl();
 			data_stream >> mtl.illumination_type;
+
 		}},
 		{ "map_Ka", [&]() {
 			auto &&mtl = get_active_mtl();

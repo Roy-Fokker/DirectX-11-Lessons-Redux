@@ -4,20 +4,22 @@
 #include <array>
 #include <string_view>
 #include <filesystem>
+#include <DirectXMath.h>
 
 namespace dx11_lessons
 {
 	struct obj_data
 	{
-		using position = std::array<float, 3>;
-		using uv_coord = std::array<float, 2>;
-		using normal = std::array<float, 3>;
+		using position = DirectX::XMFLOAT3; // std::array<float, 3>;
+		using uv_coord = DirectX::XMFLOAT2; // std::array<float, 2>;
+		using normal = DirectX::XMFLOAT3; // std::array<float, 3>;
 		using file_path = std::filesystem::path;
 		
 		std::array<position, 8> bounding_box;
 		std::vector<position> vertices;
 		std::vector<normal> normals;
 		std::vector<uv_coord> uv_coords;
+		std::vector<uint32_t> indicies;
 
 		struct group
 		{
@@ -47,7 +49,7 @@ namespace dx11_lessons
 
 			float shininess;
 			float transparency;
-			uint8_t illumination_type;
+			uint16_t illumination_type;
 
 			file_path tex_ambient;
 			file_path tex_diffuse;
