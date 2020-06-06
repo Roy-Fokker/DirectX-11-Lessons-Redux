@@ -215,10 +215,10 @@ void pipeline_state::create_sampler_state(device_t device, sampler_type sampler)
 
 void pipeline_state::create_input_layout(device_t device, const std::vector<input_element_type> &element_layout, const std::vector<byte> &vso)
 {
-	constexpr auto position  = D3D11_INPUT_ELEMENT_DESC{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 };
-	constexpr auto normal    = D3D11_INPUT_ELEMENT_DESC{ "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 };
-	constexpr auto color     = D3D11_INPUT_ELEMENT_DESC{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 };
-	constexpr auto texcoord  = D3D11_INPUT_ELEMENT_DESC{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,       0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+	constexpr auto position    = D3D11_INPUT_ELEMENT_DESC{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+	constexpr auto normal      = D3D11_INPUT_ELEMENT_DESC{ "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+	constexpr auto color       = D3D11_INPUT_ELEMENT_DESC{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+	constexpr auto texcoord    = D3D11_INPUT_ELEMENT_DESC{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,       0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 };
 
 	constexpr auto transform = std::array
 	{
@@ -229,6 +229,7 @@ void pipeline_state::create_input_layout(device_t device, const std::vector<inpu
 	};
 
 	auto transform_idx = 0u;
+	auto non_interleaved_idx = 0u;
 	auto enum_to_desc = element_layout | iter::imap([&](const input_element_type &iet)
 	{
 		switch (iet)
@@ -241,6 +242,30 @@ void pipeline_state::create_input_layout(device_t device, const std::vector<inpu
 				return color;
 			case input_element_type::texcoord:
 				return texcoord;
+			case input_element_type::position_ni:
+			{
+				auto elem = position;
+				elem.InputSlot = non_interleaved_idx++;
+				return elem;
+			}
+			case input_element_type::normal_ni:
+			{
+				auto elem = normal;
+				elem.InputSlot = non_interleaved_idx++;
+				return elem;
+			}
+			case input_element_type::color_ni:
+			{
+				auto elem = color;
+				elem.InputSlot = non_interleaved_idx++;
+				return elem;
+			}
+			case input_element_type::texcoord_ni:
+			{
+				auto elem = texcoord;
+				elem.InputSlot = non_interleaved_idx++;
+				return elem;
+			}
 			case input_element_type::instance_float4:
 				assert(transform_idx < 4);
 				return transform.at(transform_idx++);

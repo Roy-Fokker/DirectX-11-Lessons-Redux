@@ -57,10 +57,17 @@ namespace dx11_lessons
 
 		enum class input_element_type
 		{
+			// Interleaved
 			position,
 			normal,
 			color,
 			texcoord,
+			// Non-interleaved
+			position_ni, 
+			normal_ni,
+			color_ni,
+			texcoord_ni,
+			// Instanced
 			instance_float4,
 		};
 
