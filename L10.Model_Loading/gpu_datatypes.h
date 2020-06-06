@@ -51,6 +51,22 @@ namespace dx11_lessons
 		pipeline_state::input_element_type::instance_float4,
 	};
 
+	struct non_interleaved_mesh
+	{
+		std::vector<DirectX::XMFLOAT3> positions;
+		std::vector<DirectX::XMFLOAT3> normals;
+		std::vector<DirectX::XMFLOAT2> uv_coords;
+		std::vector<uint32_t> indicies;
+
+		struct group
+		{
+			uint8_t mtl_idx;
+			uint32_t index_start;
+			uint32_t index_count;
+		};
+		std::vector<group> groups;
+	};
+
 	struct view_matrix
 	{
 		DirectX::XMMATRIX matrix;

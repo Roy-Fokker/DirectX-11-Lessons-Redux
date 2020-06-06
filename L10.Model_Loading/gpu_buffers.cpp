@@ -25,12 +25,14 @@ namespace
 
 #pragma region Mesh Buffer
 mesh_buffer::mesh_buffer(device_t device, const mesh &data) :
-	index_count{ static_cast<uint32_t>(data.indicies.size()) },
 	buffer_strides{ sizeof(data.vertices.back()) }, 
 	buffer_offsets{ 0 }
 {
 	auto &vertices = data.vertices;
 	auto &indicies = data.indicies;
+	auto &grp = groups.emplace_back();
+	grp.index_start = 0;
+	grp.index_count = static_cast<uint32_t>(data.indicies.size());
 
 	auto desc = D3D11_BUFFER_DESC{};
 	desc.Usage = D3D11_USAGE_DEFAULT;
@@ -44,7 +46,7 @@ mesh_buffer::mesh_buffer(device_t device, const mesh &data) :
 	vertex_buffers.push_back( make_gpu_buffer(device, desc, srd) );
 
 	desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	desc.ByteWidth = index_count * sizeof(uint32_t);
+	desc.ByteWidth = grp.index_count * sizeof(uint32_t);
 	srd.pSysMem = reinterpret_cast<const void *>(indicies.data());
 	index_buffer = make_gpu_buffer(device, desc, srd);
 }
@@ -67,6 +69,55 @@ mesh_buffer::mesh_buffer(direct3d11::device_t device, const instanced_mesh &data
 	auto srd = D3D11_SUBRESOURCE_DATA{};
 	srd.pSysMem = reinterpret_cast<const void *>(transforms.data());
 	vertex_buffers.push_back(make_gpu_buffer(device, desc, srd));
+}
+
+mesh_buffer::mesh_buffer(direct3d11::device_t device, const non_interleaved_mesh &data)
+{
+	for (auto &in_grp : data.groups)
+	{
+		auto &grp = groups.emplace_back();
+		grp.index_start = in_grp.index_start;
+		grp.index_count = in_grp.index_count;
+	}
+
+	buffer_strides.push_back(sizeof(data.positions.front()));
+	buffer_strides.push_back(sizeof(data.normals.front()));
+	buffer_strides.push_back(sizeof(data.uv_coords.front()));
+	buffer_offsets = { 0, 0, 0 };
+
+	auto make_vertex_buffer = [&](const void *buff_data, uint32_t elem_count, uint32_t elem_width)
+	{
+		auto desc = D3D11_BUFFER_DESC{};
+		desc.Usage = D3D11_USAGE_DEFAULT;
+		desc.CPUAccessFlags = NULL;
+		desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		desc.ByteWidth = elem_width * elem_count;
+
+		auto srd = D3D11_SUBRESOURCE_DATA{};
+		srd.pSysMem = buff_data;
+
+		return make_gpu_buffer(device, desc, srd);
+	};
+
+	vertex_buffers.push_back(make_vertex_buffer(reinterpret_cast<const void *>(data.positions.data()),
+	                                            static_cast<uint32_t>(data.positions.size()),
+	                                            buffer_strides.at(0)));
+	vertex_buffers.push_back(make_vertex_buffer(reinterpret_cast<const void *>(data.normals.data()),
+	                                            static_cast<uint32_t>(data.normals.size()),
+	                                            buffer_strides.at(1)));
+	vertex_buffers.push_back(make_vertex_buffer(reinterpret_cast<const void *>(data.uv_coords.data()),
+	                                            static_cast<uint32_t>(data.uv_coords.size()),
+	                                            buffer_strides.at(2)));
+
+	auto desc = D3D11_BUFFER_DESC{};
+	desc.Usage = D3D11_USAGE_DEFAULT;
+	desc.CPUAccessFlags = NULL;
+	desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	desc.ByteWidth = static_cast<uint32_t>(data.indicies.size()) * sizeof(uint32_t);
+	
+	auto srd = D3D11_SUBRESOURCE_DATA{};
+	srd.pSysMem = reinterpret_cast<const void *>(data.indicies.data());
+	index_buffer = make_gpu_buffer(device, desc, srd);
 }
 
 mesh_buffer::~mesh_buffer() = default;
@@ -103,20 +154,29 @@ void mesh_buffer::activate(context_t context)
 	                            buffers[0], 
 	                            buffer_strides.data(), 
 	                            buffer_offsets.data());
-	context->IASetIndexBuffer(index_buffer.p, DXGI_FORMAT_R32_UINT, index_offset);
+
+	context->IASetIndexBuffer(index_buffer.p, DXGI_FORMAT_R32_UINT, 0);
 }
 
 void mesh_buffer::draw(context_t context)
 {
+	draw(context, 0);
+}
+
+void mesh_buffer::draw(context_t context, uint16_t group_idx)
+{
+	auto &grp = groups.at(group_idx);
+
 	if (vertex_buffers.size() == 1)
 	{
-		context->DrawIndexed(index_count, 0, 0);
+		context->DrawIndexed(grp.index_count, grp.index_start, 0);
 	}
 	else
 	{
-		context->DrawIndexedInstanced(index_count, instance_count, 0, 0, 0);
+		context->DrawIndexedInstanced(grp.index_count, instance_count, grp.index_start, 0, 0);
 	}
 }
+
 #pragma endregion
 
 #pragma region Constant Buffer

@@ -30,11 +30,13 @@ namespace dx11_lessons
 		mesh_buffer() = delete;
 		mesh_buffer(direct3d11::device_t device, const mesh &data);
 		mesh_buffer(direct3d11::device_t device, const instanced_mesh &data);
+		mesh_buffer(direct3d11::device_t device, const non_interleaved_mesh &data);
 		~mesh_buffer();
 
 		void update_instances(direct3d11::context_t context, const std::vector<matrix> &data);
 		void activate(direct3d11::context_t context);
 		void draw(direct3d11::context_t context);
+		void draw(direct3d11::context_t context, uint16_t group_idx);
 
 	private:
 		using buffer_t = CComPtr<ID3D11Buffer>;
@@ -42,10 +44,15 @@ namespace dx11_lessons
 		std::vector<uint32_t> buffer_strides{},
 		                      buffer_offsets{};
 
+		struct group
+		{
+			uint32_t index_start,
+			         index_count;
+		};
+
 		buffer_t index_buffer;
-		uint32_t index_count{},
-		         index_offset{},
-		         instance_count{};
+		std::vector<group> groups{};
+		uint32_t instance_count{};
 	};
 
 	class constant_buffer
